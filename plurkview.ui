@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>240</height>
+    <width>501</width>
+    <height>315</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,18 +17,24 @@
    <item row="0" column="0">
     <widget class="QComboBox" name="qualifierCombo"/>
    </item>
-   <item row="0" column="1" colspan="3">
+   <item row="0" column="1" colspan="4">
     <widget class="QLineEdit" name="contentEdit"/>
    </item>
-   <item row="0" column="4">
+   <item row="0" column="5">
     <widget class="QPushButton" name="plurkBtn">
      <property name="text">
       <string>Plurk</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="5">
+   <item row="1" column="0" colspan="6">
     <widget class="QScrollArea" name="plurkListScroll">
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>100</height>
+      </size>
+     </property>
      <property name="horizontalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
@@ -40,8 +46,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>386</width>
-        <height>126</height>
+        <width>487</width>
+        <height>201</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
@@ -56,10 +62,10 @@
     </widget>
    </item>
    <item row="2" column="0" colspan="2">
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="allPlurkBtn">
      <property name="minimumSize">
       <size>
-       <width>91</width>
+       <width>80</width>
        <height>0</height>
       </size>
      </property>
@@ -78,10 +84,10 @@
     </widget>
    </item>
    <item row="2" column="2">
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QPushButton" name="myPlurkBtn">
      <property name="minimumSize">
       <size>
-       <width>81</width>
+       <width>80</width>
        <height>0</height>
       </size>
      </property>
@@ -94,10 +100,10 @@
     </widget>
    </item>
    <item row="2" column="3">
-    <widget class="QPushButton" name="pushButton_3">
+    <widget class="QPushButton" name="privateBtn">
      <property name="minimumSize">
       <size>
-       <width>71</width>
+       <width>80</width>
        <height>0</height>
       </size>
      </property>
@@ -110,10 +116,10 @@
     </widget>
    </item>
    <item row="2" column="4">
-    <widget class="QPushButton" name="pushButton_4">
+    <widget class="QPushButton" name="respondedBtn">
      <property name="minimumSize">
       <size>
-       <width>91</width>
+       <width>80</width>
        <height>0</height>
       </size>
      </property>
@@ -125,7 +131,23 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="5">
+   <item row="2" column="5">
+    <widget class="QPushButton" name="unreadBtn">
+     <property name="minimumSize">
+      <size>
+       <width>80</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Unread</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="6">
     <widget class="QPushButton" name="refreshBtn">
      <property name="text">
       <string>Refresh</string>

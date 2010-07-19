@@ -2,10 +2,10 @@
 #define PLURKVIEW_H
 
 #include <QWidget>
-#include <QListView>
 #include <QStringListModel>
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QButtonGroup>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
@@ -36,7 +36,8 @@ private:
     QVariant *cookie;
     QList<clickLabel*> plurkList;
     QMap<QString, QString> imgMap;
-    QVBoxLayout* plurkLayout;
+    QVBoxLayout *plurkLayout;
+    QButtonGroup *btnGroup;
 
 public slots:
     void loadFinished();

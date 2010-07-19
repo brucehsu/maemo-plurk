@@ -39,11 +39,13 @@ clickLabel::~clickLabel() {
 
 void clickLabel::mousePressEvent(QMouseEvent *ev) {
     this->setStyleSheet(border + "; background-color: blue");
+    QLabel::mousePressEvent(ev);
 }
 
 void clickLabel::mouseReleaseEvent( QMouseEvent * ev ) {
     this->setStyleSheet(border);
     emit clicked();
+    QLabel::mouseReleaseEvent(ev);
 }
 
 void clickLabel::imgLoaded(QNetworkReply *reply) {

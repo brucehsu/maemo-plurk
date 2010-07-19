@@ -9,6 +9,14 @@ PlurkView::PlurkView(QWidget *parent) :
     ui->setupUi(this);
     plurkLayout = new QVBoxLayout(ui->plurkListScroll);
     plurkLayout->setMargin(1);
+
+    btnGroup = new QButtonGroup();
+    btnGroup->addButton(ui->allPlurkBtn);
+    btnGroup->addButton(ui->myPlurkBtn);
+    btnGroup->addButton(ui->privateBtn);
+    btnGroup->addButton(ui->respondedBtn);
+    btnGroup->addButton(ui->unreadBtn);
+
     //ui->plurkListScroll->setWidget(ui->plurkListWidget);
     ui->plurkListWidget->setLayout(plurkLayout);
     ui->contentEdit->setCompleter(0);
@@ -52,7 +60,9 @@ void PlurkView::loadFinished() {
         QString owner_name = (uMap["display_name"].toString().isEmpty()) ? uMap["nick_name"].toString() : uMap["display_name"].toString();
         QString qual_trans = pMap["qualifier_translated"].toString();
         QString content = pMap["content"].toString();
-        QString whole = owner_name + " " + qual_trans + ": " + content;
+        QString whole = owner_name + " " + qual_trans + ": " + content +
+                        "<br /><div align=\"right\"><font color=\"gray\">" + pMap["response_count"].toString() +
+                        " Responses</font></div>";
         clickLabel* tmpLabel = new clickLabel(whole,pMap["plurk_id"].toString());
         tmpLabel->setWordWrap(true);
         tmpLabel->setOpenExternalLinks(true);
