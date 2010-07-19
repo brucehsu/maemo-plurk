@@ -1,6 +1,5 @@
 #include "logindialog.h"
 #include "ui_logindialog.h"
-#include "plurkview.h"
 #include <QPixmap>
 
 LoginDialog::LoginDialog(QWidget *parent) :
@@ -17,6 +16,7 @@ LoginDialog::LoginDialog(QWidget *parent) :
 
 LoginDialog::~LoginDialog()
 {
+    delete pv;
     delete ui;
 }
 
@@ -37,7 +37,7 @@ void LoginDialog::loginFinished() {
     disconnect(rep,SIGNAL(finished()),this,SLOT(loginFinished()));
     cookie = new QVariant(rep->header(QNetworkRequest::SetCookieHeader));
     if(QString(rep->readAll()).contains("success")) {
-        PlurkView *pv = new PlurkView();
+        pv = new PlurkView();
         pv->setCookie(cookie);
         pv->setNetwork(manager);
         pv->loadPlurks();

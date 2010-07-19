@@ -6,6 +6,7 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkCookieJar>
+#include "plurkview.h"
 
 namespace Ui {
     class LoginDialog;
@@ -25,6 +26,7 @@ private:
     QNetworkRequest *req;
     QNetworkReply *rep;
     QVariant *cookie;
+    PlurkView *pv;
 
 public slots:
     void loginPlurk();

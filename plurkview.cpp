@@ -17,6 +17,10 @@ PlurkView::PlurkView(QWidget *parent) :
 
 PlurkView::~PlurkView()
 {
+    foreach(clickLabel* label, plurkList) {
+        delete label;
+    }
+
     delete ui;
 }
 
@@ -49,7 +53,7 @@ void PlurkView::loadFinished() {
         QString qual_trans = pMap["qualifier_translated"].toString();
         QString content = pMap["content"].toString();
         QString whole = owner_name + " " + qual_trans + ": " + content;
-        clickLabel* tmpLabel = new clickLabel(whole);
+        clickLabel* tmpLabel = new clickLabel(whole,pMap["plurk_id"].toString());
         tmpLabel->setWordWrap(true);
         tmpLabel->setOpenExternalLinks(true);
         plurkList.append(tmpLabel);
