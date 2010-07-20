@@ -13,13 +13,13 @@
 #include <QtWebKit/QWebElement>
 #include <QtWebKit/QWebElementCollection>
 
-class clickLabel : public QLabel
+class ClickLabel : public QLabel
 {
     Q_OBJECT
 public:
-    explicit clickLabel(QWidget *parent = 0);
-    clickLabel(QString text,QString plid);
-    ~clickLabel();
+    explicit ClickLabel(QWidget *parent = 0);
+    ClickLabel(QString text,QString plid);
+    ~ClickLabel();
 
 protected:
     void mousePressEvent (QMouseEvent *ev);

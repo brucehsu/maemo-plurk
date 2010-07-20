@@ -12,6 +12,7 @@
 #include <QtNetwork/QNetworkCookieJar>
 #include <qjson/parser.h>
 #include "clicklabel.h"
+#include "plurkdbmanager.h"
 
 namespace Ui {
     class PlurkView;
@@ -30,14 +31,18 @@ public:
 
 private:
     Ui::PlurkView *ui;
-    QNetworkAccessManager *manager;
+    QNetworkAccessManager *networkManager;
     QNetworkRequest *req;
     QNetworkReply *rep;
     QVariant *cookie;
-    QList<clickLabel*> plurkList;
+    QList<ClickLabel*> plurkList;
     QMap<QString, QString> imgMap;
     QVBoxLayout *plurkLayout;
     QButtonGroup *btnGroup;
+    PlurkDbManager *dbManager;
+    void addPlurkLabel(QString plurk_id,QString owner_name,
+                       QString qual_trans, QString content,
+                       QString res_cnt);
 
 public slots:
     void loadFinished();

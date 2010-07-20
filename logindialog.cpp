@@ -1,6 +1,7 @@
 #include "logindialog.h"
 #include "ui_logindialog.h"
-#include <QPixmap>
+#include "const.h"
+#include <QDebug>
 
 LoginDialog::LoginDialog(QWidget *parent) :
     QWidget(parent),
@@ -12,11 +13,13 @@ LoginDialog::LoginDialog(QWidget *parent) :
     ui->usernameEdit->setCompleter(0);
     ui->passwdEdit->setCompleter(0);
     manager = new QNetworkAccessManager();
+    pv = 0;
 }
 
 LoginDialog::~LoginDialog()
 {
-    delete pv;
+    if(pv!=0) delete pv;
+    delete manager;
     delete ui;
 }
 
@@ -26,7 +29,7 @@ void LoginDialog::loginPlurk() {
     ui->checkBox->setEnabled(false);
     ui->loginBtn->setEnabled(false);
 
-    req = new QNetworkRequest(QUrl(QString("https://www.plurk.com/API/Users/login?api_key=RsNlrQJFiHkPelX8aCMbx48Nq89QnZRB")
+    req = new QNetworkRequest(QUrl(QString(APIURL_SSL + USERS_LOGIN + "api_key=" + APIKEY)
                                    + "&username=" + ui->usernameEdit->text() +
                                    "&password=" + ui->passwdEdit->text() + "&no_data=1"));
     rep = manager->get(*req);

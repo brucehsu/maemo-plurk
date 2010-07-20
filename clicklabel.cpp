@@ -3,13 +3,13 @@
 
 const QString border = "border: 1px solid white";
 
-clickLabel::clickLabel(QWidget *parent) :
+ClickLabel::ClickLabel(QWidget *parent) :
     QLabel(parent)
 {
     this->setStyleSheet(border);
 }
 
-clickLabel::clickLabel(QString text,QString plid) {
+ClickLabel::ClickLabel(QString text,QString plid) {
     this->plid = plid;
     this->imgCount = 0;
 
@@ -29,26 +29,28 @@ clickLabel::clickLabel(QString text,QString plid) {
     this->setStyleSheet(border);
 }
 
-clickLabel::~clickLabel() {
+ClickLabel::~ClickLabel() {
     //Delete all temporary image files
     foreach(QString lname, imgList) {
         QFile *local = new QFile(lname);
         local->remove();
     }
+
+    delete page;
 }
 
-void clickLabel::mousePressEvent(QMouseEvent *ev) {
+void ClickLabel::mousePressEvent(QMouseEvent *ev) {
     this->setStyleSheet(border + "; background-color: blue");
     QLabel::mousePressEvent(ev);
 }
 
-void clickLabel::mouseReleaseEvent( QMouseEvent * ev ) {
+void ClickLabel::mouseReleaseEvent( QMouseEvent * ev ) {
     this->setStyleSheet(border);
     emit clicked();
     QLabel::mouseReleaseEvent(ev);
 }
 
-void clickLabel::imgLoaded(QNetworkReply *reply) {
+void ClickLabel::imgLoaded(QNetworkReply *reply) {
     //Write downloaded image to filesystem
     QString imgUrl = reply->url().toString();
     QString imgType = imgUrl.right(imgUrl.length() - imgUrl.lastIndexOf('.') - 1);

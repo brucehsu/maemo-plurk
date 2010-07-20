@@ -7,7 +7,7 @@
 
 LIBS += -L/usr/lib -lqjson
 
-QT       += core gui network qjson webkit
+QT       += core gui network sql webkit qjson webkit
 
 TARGET = maemo-plurk
 TEMPLATE = app
@@ -16,12 +16,15 @@ TEMPLATE = app
 SOURCES += main.cpp \
     logindialog.cpp \
     plurkview.cpp \
-    clicklabel.cpp
+    clicklabel.cpp \
+    plurkdbmanager.cpp
 
 HEADERS  += \
     logindialog.h \
     plurkview.h \
-    clicklabel.h
+    clicklabel.h \
+    plurkdbmanager.h \
+    const.h
 
 CONFIG += mobility
 MOBILITY = 
