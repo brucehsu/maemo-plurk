@@ -2,6 +2,7 @@
 #define PLURKDBMANAGER_H
 #include <QMessageBox>
 #include <QObject>
+#include <QVariant>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 
@@ -17,6 +18,9 @@ public:
     void addResponse(QString plurk_id, QString user_id, QString content,
                      QString posted);
     void addUser(QString user_id, QString nick_name, QString display_name);
+    QList<QMap<QString,QString>*>* getAllPlurks();
+    QList<QMap<QString,QString>*>* getAllUsers();
+    QString getUserNameById(QString userId);
 
 private:
     QSqlDatabase db;

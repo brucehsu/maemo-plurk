@@ -15,10 +15,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="margin">
-    <number>3</number>
-   </property>
-   <property name="horizontalSpacing">
-    <number>-1</number>
+    <number>2</number>
    </property>
    <item row="0" column="0">
     <widget class="QComboBox" name="qualifierCombo">
@@ -119,26 +116,23 @@
      </item>
     </widget>
    </item>
-   <item row="0" column="1" colspan="6">
+   <item row="0" column="1" colspan="7">
     <widget class="QLineEdit" name="contentEdit"/>
    </item>
-   <item row="0" column="7">
+   <item row="0" column="8">
     <widget class="QPushButton" name="plurkBtn">
      <property name="text">
       <string>Plurk</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="8">
+   <item row="1" column="0" colspan="9">
     <widget class="QScrollArea" name="plurkListScroll">
      <property name="minimumSize">
       <size>
        <width>100</width>
        <height>100</height>
       </size>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
      <property name="widgetResizable">
       <bool>true</bool>
@@ -148,15 +142,15 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>509</width>
-        <height>208</height>
+        <width>511</width>
+        <height>210</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout">
        <property name="margin">
-        <number>1</number>
+        <number>0</number>
        </property>
-       <item row="0" column="0">
+       <item>
         <widget class="QWidget" name="plurkListWidget" native="true"/>
        </item>
       </layout>
@@ -233,7 +227,7 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="5">
+   <item row="2" column="5" colspan="2">
     <widget class="QPushButton" name="likedBtn">
      <property name="text">
       <string>Liked</string>
@@ -243,7 +237,7 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="6" colspan="2">
+   <item row="2" column="7" colspan="2">
     <widget class="QPushButton" name="unreadBtn">
      <property name="minimumSize">
       <size>
@@ -259,10 +253,17 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="8">
+   <item row="3" column="0" colspan="6">
     <widget class="QPushButton" name="refreshBtn">
      <property name="text">
       <string>Refresh</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="6" colspan="3">
+    <widget class="QPushButton" name="markAllBtn">
+     <property name="text">
+      <string>Mark all as read</string>
      </property>
     </widget>
    </item>

@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QButtonGroup>
+#include <QDateTime>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
@@ -27,7 +28,6 @@ public:
     ~PlurkView();
     void setCookie(QVariant* cookie);
     void setNetwork(QNetworkAccessManager* manager);
-    void loadPlurks();
 
 private:
     Ui::PlurkView *ui;
@@ -36,7 +36,7 @@ private:
     QNetworkReply *rep;
     QVariant *cookie;
     QList<ClickLabel*> plurkList;
-    QMap<QString, QString> imgMap;
+    QList<QMap<QString,QString>*>* userList;
     QVBoxLayout *plurkLayout;
     QButtonGroup *btnGroup;
     PlurkDbManager *dbManager;
@@ -46,6 +46,7 @@ private:
 
 public slots:
     void loadFinished();
+    void loadPlurks();
 };
 
 #endif // PLURKVIEW_H

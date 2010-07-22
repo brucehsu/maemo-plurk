@@ -1,7 +1,7 @@
 #include "clicklabel.h"
 #include <QDebug>
 
-const QString border = "border: 1px solid white";
+const QString border = "border: 2px solid white;border-radius: 4px";
 
 ClickLabel::ClickLabel(QWidget *parent) :
     QLabel(parent)
