@@ -33,6 +33,7 @@ PlurkDbManager::PlurkDbManager()
                + "CREATE TABLE responses("
                + "id INTEGER PRIMARY KEY ASC,"
                + "plurk_id,"
+               + "res_id,"
                + "user_id,"
                + "posted,"
                + "content)");
@@ -94,15 +95,33 @@ void PlurkDbManager::addPlurk(QString plurk_id, QString plurk_type,
     }
 }
 
-void PlurkDbManager::addResponse(QString plurk_id, QString user_id,
-                                 QString content, QString posted) {
+void PlurkDbManager::addResponse(QString plurk_id, QString res_id,
+                                 QString user_id, QString content,
+                                 QString posted) {
+    QSqlQuery query;
+    query.exec("SELECT * FROM response WHERE plurk_id='" + user_id + "'");
+    if(query.next()) {
+        //Update record
+        query.exec("UPDATE users SET display_name='" + display_name + "'"
+                   + "WHERE user_id='" + user_id +"'");
+    } else {
+        //Add record
+        QString dummy;
+        query.exec(dummy + "INSERT INTO users(" +
+                   + "user_id,"
+                   + "nick_name,"
+                   + "display_name) VALUES("
+                   + "'" + user_id + "',"
+                   + "'" + nick_name + "',"
+                   + "'" + display_name +"')");
+    }
 
 }
 
 void PlurkDbManager::addUser(QString user_id, QString nick_name,
                              QString display_name) {
     QSqlQuery query;
-    query.exec("SELECT * FROM plurks WHERE plurk_id='" + user_id + "'");
+    query.exec("SELECT * FROM users WHERE user_id='" + user_id + "'");
     if(query.next()) {
         //Update record
         query.exec("UPDATE users SET display_name='" + display_name + "'"

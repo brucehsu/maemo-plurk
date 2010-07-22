@@ -15,7 +15,7 @@ public:
                    QString content, QString is_unread, QString favorite,
                    QString qual_trans, QString res_seen,QString res_cnt,
                    QString posted);
-    void addResponse(QString plurk_id, QString user_id, QString content,
+    void addResponse(QString plurk_id, QString res_id, QString user_id, QString content,
                      QString posted);
     void addUser(QString user_id, QString nick_name, QString display_name);
     QList<QMap<QString,QString>*>* getAllPlurks();
