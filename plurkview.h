@@ -36,6 +36,7 @@ private:
     QNetworkReply *rep;
     QVariant *cookie;
     QList<ClickLabel*> plurkList;
+    QMap<QString,ClickLabel*> plurkMap;
     QList<QMap<QString,QString>*>* userList;
     QVBoxLayout *plurkLayout;
     QButtonGroup *btnGroup;
@@ -45,7 +46,7 @@ private:
                        QString res_cnt);
 
 public slots:
-    void loadFinished();
+    void loadFinished(QNetworkReply* reply);
     void loadPlurks();
 };
 

@@ -134,7 +134,7 @@ QList<QMap<QString,QString>*>* PlurkDbManager::getAllPlurks() {
                "qualifier_translated,"
                "responses_seen,"
                "response_count,"
-               "posted" " FROM plurks ORDER BY posted DESC");
+               "posted" " FROM plurks ORDER BY posted ASC");
 
     QMap<QString,QString> map;
     while(query.next()) {

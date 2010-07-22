@@ -34,6 +34,7 @@ ClickLabel::~ClickLabel() {
     foreach(QString lname, imgList) {
         QFile *local = new QFile(lname);
         local->remove();
+        delete local;
     }
 
     delete page;

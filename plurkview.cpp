@@ -31,7 +31,7 @@ PlurkView::PlurkView(QWidget *parent) :
 
 PlurkView::~PlurkView()
 {
-    foreach(ClickLabel* label, plurkList) {
+    foreach(ClickLabel* label, plurkMap) {
         delete label;
     }
 
@@ -50,38 +50,51 @@ void PlurkView::setNetwork(QNetworkAccessManager *manager) {
 }
 
 void PlurkView::loadPlurks() {
-    ui->plurkListWidget->setMaximumWidth(ui->plurkListScroll->viewport()->size().width()-18);
+    if(dbManager==0)
+        ui->plurkListWidget->setMaximumWidth(ui->plurkListScroll->viewport()->size().width()-18);
     if(QFile::exists("plurks.db")) {
+        QDateTime latest;
         if(dbManager==0) {
-            dbManager = new PlurkDbManager;
+            dbManager = new PlurkDbManager();
             QList<QMap<QString,QString>*>* dbList = dbManager->getAllPlurks();
             QMap<QString,QString>* map;
             foreach(map, (*dbList)) {
                 QMap<QString,QString> tmpMap = *map;
+                latest.setTime_t(tmpMap["posted"].toInt());
                 addPlurkLabel(tmpMap["plurk_id"],dbManager->getUserNameById(tmpMap["owner_id"]),
                               tmpMap["qualifier_trasnlated"],tmpMap["content"],tmpMap["response_count"]);
             }
         }
 
-        req = new QNetworkRequest(QUrl(APIURL+ POLL_GET_PLURKS +"api_key=" + APIKEY +"&limit=30"));
+        //For new plurks
+        QString offset = latest.toString("yyyy-MM-ddThh:mm:ss");
+        req = new QNetworkRequest(QUrl(APIURL+ POLL_GET_PLURKS +"api_key=" + APIKEY + "&offset=" + offset));
+        req->setHeader(QNetworkRequest::CookieHeader,*cookie);
+        rep = networkManager->get(*req);
+
+        //For unread plurks
+        req = new QNetworkRequest(QUrl(APIURL+ TIMELINE_GET_UNREAD +"api_key=" + APIKEY));
     } else {
         req = new QNetworkRequest(QUrl(APIURL+ TIMELINE_GET_PLURKS +"api_key=" + APIKEY +"&limit=30"));
     }
-    if(dbManager==0) dbManager = new PlurkDbManager();
+    if(dbManager==0) {
+        dbManager = new PlurkDbManager();
+    }
     req->setHeader(QNetworkRequest::CookieHeader,*cookie);
     rep = networkManager->get(*req);
-    connect(rep,SIGNAL(finished()),this,SLOT(loadFinished()));
+    connect(networkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(loadFinished(QNetworkReply*)));
 }
 
-void PlurkView::loadFinished() {
+void PlurkView::loadFinished(QNetworkReply* reply) {
+    QByteArray a = reply->readAll();
     QJson::Parser parser;
     bool ok;
-    QVariantMap result = parser.parse(rep->readAll(),&ok).toMap();
+    QVariantMap result = parser.parse(a,&ok).toMap();
     if(!ok) return;
     QList<QVariant> plurks = result["plurks"].toList();
     QVariantMap users = result["plurk_users"].toMap();
 
-    for(int i=0;i<plurks.count();i++) {
+    for(int i=plurks.count()-1;i>=0;i--) {
         QVariantMap pMap = plurks[i].toMap();
         QVariantMap uMap = users[pMap["owner_id"].toString()].toMap();
         QString plurk_id = pMap["plurk_id"].toString();
@@ -110,13 +123,21 @@ void PlurkView::loadFinished() {
 
 void PlurkView::addPlurkLabel(QString plurk_id, QString owner_name, QString qual_trans,
                    QString content, QString res_cnt) {
+
     QString whole = owner_name + " " + qual_trans + ": " + content +
                     "<br /><div align=\"right\"><font color=\"gray\">" + res_cnt +
                     " Responses</font></div>";
 
+    if(plurkMap.contains(plurk_id)) {
+        //Edit existing label
+        plurkMap[plurk_id]->setText(whole);
+        return;
+    }
+
+    //Add new label
     ClickLabel* tmpLabel = new ClickLabel(whole,plurk_id);
     tmpLabel->setWordWrap(true);
     tmpLabel->setOpenExternalLinks(true);
-    plurkList.append(tmpLabel);
-    plurkLayout->addWidget(tmpLabel);
+    plurkMap[plurk_id] = tmpLabel;
+    plurkLayout->insertWidget(0,tmpLabel);
 }
