@@ -50,8 +50,10 @@ void PlurkView::setNetwork(QNetworkAccessManager *manager) {
 }
 
 void PlurkView::loadPlurks() {
-    if(dbManager==0)
-        ui->plurkListWidget->setMaximumWidth(ui->plurkListScroll->viewport()->size().width()-18);
+    if(dbManager==0) {
+        ui->plurkListWidget->setMinimumWidth(774);
+        ui->plurkListWidget->setMaximumWidth(774);
+    }
     if(QFile::exists("plurks.db")) {
         QDateTime latest;
         if(dbManager==0) {

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>521</width>
+    <width>527</width>
     <height>320</height>
    </rect>
   </property>
@@ -142,7 +142,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>511</width>
+        <width>517</width>
         <height>210</height>
        </rect>
       </property>
@@ -163,6 +163,12 @@
       <size>
        <width>80</width>
        <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>48</height>
       </size>
      </property>
      <property name="text">
@@ -187,6 +193,12 @@
        <height>0</height>
       </size>
      </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>48</height>
+      </size>
+     </property>
      <property name="text">
       <string>My plurks</string>
      </property>
@@ -201,6 +213,12 @@
       <size>
        <width>80</width>
        <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>48</height>
       </size>
      </property>
      <property name="text">
@@ -219,6 +237,12 @@
        <height>0</height>
       </size>
      </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>48</height>
+      </size>
+     </property>
      <property name="text">
       <string>Responded</string>
      </property>
@@ -229,6 +253,12 @@
    </item>
    <item row="2" column="5" colspan="2">
     <widget class="QPushButton" name="likedBtn">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>48</height>
+      </size>
+     </property>
      <property name="text">
       <string>Liked</string>
      </property>
@@ -243,6 +273,12 @@
       <size>
        <width>80</width>
        <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>48</height>
       </size>
      </property>
      <property name="text">
