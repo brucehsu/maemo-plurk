@@ -99,21 +99,23 @@ void PlurkDbManager::addResponse(QString plurk_id, QString res_id,
                                  QString user_id, QString content,
                                  QString posted) {
     QSqlQuery query;
-    query.exec("SELECT * FROM response WHERE plurk_id='" + user_id + "'");
+    query.exec("SELECT * FROM response WHERE res_id='" + res_id + "'");
     if(query.next()) {
-        //Update record
-        query.exec("UPDATE users SET display_name='" + display_name + "'"
-                   + "WHERE user_id='" + user_id +"'");
+        //Not need to update
     } else {
         //Add record
         QString dummy;
-        query.exec(dummy + "INSERT INTO users(" +
+        query.exec(dummy + "INSERT INTO response(" +
+                   + "plurk_id,"
+                   + "res_id,"
                    + "user_id,"
-                   + "nick_name,"
-                   + "display_name) VALUES("
+                   + "content,"
+                   + "posted) VALUES("
+                   + "'" + plurk_id + "',"
+                   + "'" + res_id + "',"
                    + "'" + user_id + "',"
-                   + "'" + nick_name + "',"
-                   + "'" + display_name +"')");
+                   + "'" + content + "',"
+                   + "'" + posted +"')");
     }
 
 }
@@ -203,4 +205,9 @@ QString PlurkDbManager::getUserNameById(QString userId) {
     } else {
         return QString("");
     }
+}
+
+void PlurkDbManager::markAllAsUnread() {
+    QSqlQuery query;
+    query.exec("UPDATE plurks SET is_unread='0'");
 }

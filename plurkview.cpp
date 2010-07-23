@@ -20,8 +20,15 @@ PlurkView::PlurkView(QWidget *parent) :
     btnGroup->addButton(ui->unreadBtn);
 
     dbManager = 0;
+    dbList = 0;
 
     connect(ui->refreshBtn,SIGNAL(clicked()),this,SLOT(loadPlurks()));
+    connect(ui->allPlurkBtn,SIGNAL(clicked()),this,SLOT(displayAllPlurks()));
+    connect(ui->myPlurkBtn,SIGNAL(clicked()),SLOT(displayMyPlurks()));
+    connect(ui->privateBtn,SIGNAL(clicked()),SLOT(displayPrivate()));
+    connect(ui->respondedBtn,SIGNAL(clicked()),this,SLOT(displayResponded()));
+    connect(ui->likedBtn,SIGNAL(clicked()),SLOT(displayLiked()));
+    connect(ui->unreadBtn,SIGNAL(clicked()),this,SLOT(displayUnread()));
 
     //ui->plurkListScroll->setWidget(ui->plurkListWidget);
     ui->plurkListWidget->setLayout(plurkLayout);
@@ -58,7 +65,9 @@ void PlurkView::loadPlurks() {
         QDateTime latest;
         if(dbManager==0) {
             dbManager = new PlurkDbManager();
-            QList<QMap<QString,QString>*>* dbList = dbManager->getAllPlurks();
+            dbManager->markAllAsUnread();
+            if(dbList!=0) delete dbList;
+            dbList = dbManager->getAllPlurks();
             QMap<QString,QString>* map;
             foreach(map, (*dbList)) {
                 QMap<QString,QString> tmpMap = *map;
@@ -121,6 +130,10 @@ void PlurkView::loadFinished(QNetworkReply* reply) {
         dbManager->addUser(owner_id,uMap["nick_name"].toString(),owner_name);
         addPlurkLabel(plurk_id,owner_name,qual_trans,content,res_cnt);
     }
+
+
+    if(dbList!=0) delete dbList;
+    dbList = dbManager->getAllPlurks();
 }
 
 void PlurkView::addPlurkLabel(QString plurk_id, QString owner_name, QString qual_trans,
@@ -142,4 +155,66 @@ void PlurkView::addPlurkLabel(QString plurk_id, QString owner_name, QString qual
     tmpLabel->setOpenExternalLinks(true);
     plurkMap[plurk_id] = tmpLabel;
     plurkLayout->insertWidget(0,tmpLabel);
+}
+
+void PlurkView::setUserId(QString id) {
+    this->userId = id;
+}
+
+void PlurkView::displayAllPlurks() {
+    foreach(ClickLabel* label, plurkMap) {
+        label->setVisible(true);
+    }
+}
+
+void PlurkView::displayMyPlurks() {
+    QMap<QString,QString>* pmap;
+    foreach(pmap, *dbList) {
+        QMap<QString,QString> map = (*pmap);
+        if(map["owner_id"]==this->userId) {
+            plurkMap[map["plurk_id"]]->setVisible(true);
+        } else {
+            plurkMap[map["plurk_id"]]->setVisible(false);
+        }
+    }
+}
+
+void PlurkView::displayPrivate() {
+    QMap<QString,QString>* pmap;
+    foreach(pmap, *dbList) {
+        QMap<QString,QString> map = (*pmap);
+        if(map["plurk_type"]=="1" || map["plurk_type"]=="3") {
+            plurkMap[map["plurk_id"]]->setVisible(true);
+        } else {
+            plurkMap[map["plurk_id"]]->setVisible(false);
+        }
+    }
+}
+
+void PlurkView::displayResponded() {
+
+}
+
+void PlurkView::displayLiked() {
+    QMap<QString,QString>* pmap;
+    foreach(pmap, *dbList) {
+        QMap<QString,QString> map = (*pmap);
+        if(map["favorite"]=="true") {
+            plurkMap[map["plurk_id"]]->setVisible(true);
+        } else {
+            plurkMap[map["plurk_id"]]->setVisible(false);
+        }
+    }
+}
+
+void PlurkView::displayUnread() {
+    QMap<QString,QString>* pmap;
+    foreach(pmap, *dbList) {
+        QMap<QString,QString> map = (*pmap);
+        if(map["is_unread"]=="1") {
+            plurkMap[map["plurk_id"]]->setVisible(true);
+        } else {
+            plurkMap[map["plurk_id"]]->setVisible(false);
+        }
+    }
 }

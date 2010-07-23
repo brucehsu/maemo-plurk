@@ -21,6 +21,7 @@ public:
     QList<QMap<QString,QString>*>* getAllPlurks();
     QList<QMap<QString,QString>*>* getAllUsers();
     QString getUserNameById(QString userId);
+    void markAllAsUnread();
 
 private:
     QSqlDatabase db;
