@@ -32,7 +32,7 @@ public:
 
 private:
     Ui::PlurkView *ui;
-    QNetworkAccessManager *networkManager;
+    QNetworkAccessManager *networkManager, *avatarNetworkManager;
     QNetworkRequest *req;
     QNetworkReply *rep;
     QVariant *cookie;
@@ -48,9 +48,12 @@ private:
                        QString owner_avatar, QString qual_trans,
                        QString content, QString res_cnt);
     void loadPlurkFromDb();
+    void getAvatars();
+    void refreshQueryMaps();
 
 public slots:
     void getPlurksFinished(QNetworkReply* reply);
+    void getAvatarsFinished(QNetworkReply* reply);
     void getPlurks();
     void displayAllPlurks();
     void displayMyPlurks();

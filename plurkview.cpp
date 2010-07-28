@@ -57,6 +57,14 @@ void PlurkView::setNetwork(QNetworkAccessManager *manager) {
     this->networkManager = manager;
 }
 
+void PlurkView::refreshQueryMaps() {
+    if(dbPlurkMap!=0) delete dbPlurkMap;
+    dbPlurkMap = dbManager->getAllPlurks();
+
+    if(dbUserMap!=0) delete dbUserMap;
+    dbUserMap = dbManager->getAllUsers();
+}
+
 void PlurkView::getPlurks() {
     if(dbManager==0) {
         ui->plurkListWidget->setMinimumWidth(774);
@@ -66,12 +74,6 @@ void PlurkView::getPlurks() {
         if(dbManager==0) {
             dbManager = new PlurkDbManager();
             dbManager->markAllAsUnread();
-
-            if(dbPlurkMap!=0) delete dbPlurkMap;
-            dbPlurkMap = dbManager->getAllPlurks();
-
-            if(dbUserMap!=0) delete dbUserMap;
-            dbUserMap = dbManager->getAllUsers();
 
             loadPlurkFromDb();
         }
@@ -94,6 +96,10 @@ void PlurkView::getPlurks() {
     req->setHeader(QNetworkRequest::CookieHeader,*cookie);
     rep = networkManager->get(*req);
     connect(networkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(getPlurksFinished(QNetworkReply*)));
+}
+
+void PlurkView::getAvatars() {
+
 }
 
 void PlurkView::getPlurksFinished(QNetworkReply* reply) {
@@ -136,13 +142,11 @@ void PlurkView::getPlurksFinished(QNetworkReply* reply) {
                       qual_trans,content,res_cnt);*/
     }
 
-
-    if(dbPlurkMap!=0) delete dbPlurkMap;
-    dbPlurkMap = dbManager->getAllPlurks();
-    if(dbUserMap!=0) delete dbUserMap;
-    dbUserMap = dbManager->getAllUsers();
-
     loadPlurkFromDb();
+}
+
+void PlurkView::getAvatarsFinished(QNetworkReply *reply) {
+
 }
 
 void PlurkView::addPlurkLabel(QString plurk_id, QString owner_id,
@@ -234,6 +238,8 @@ void PlurkView::displayUnread() {
 }
 
 void PlurkView::loadPlurkFromDb() {
+    refreshQueryMaps();
+
     QMap<QString,QString>* map;
     foreach(map, (*dbPlurkMap)) {
         QMap<QString,QString> tmpMap = *map;
