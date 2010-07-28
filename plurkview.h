@@ -38,18 +38,20 @@ private:
     QVariant *cookie;
     QString userId;
     QMap<QString,ClickLabel*> plurkMap;
-    QList<QMap<QString,QString>*>* dbList;
-    QList<QMap<QString,QString>*>* userList;
+    QMap<QString, ItemMap*>* dbPlurkMap;
+    QMap<QString, ItemMap*>* dbUserMap;
     QVBoxLayout *plurkLayout;
     QButtonGroup *btnGroup;
     PlurkDbManager *dbManager;
-    void addPlurkLabel(QString plurk_id,QString owner_name,
-                       QString qual_trans, QString content,
-                       QString res_cnt);
+    void addPlurkLabel(QString plurk_id,QString owner_id,
+                       QString owner_name,QString owner_image,
+                       QString owner_avatar, QString qual_trans,
+                       QString content, QString res_cnt);
+    void loadPlurkFromDb();
 
 public slots:
-    void loadFinished(QNetworkReply* reply);
-    void loadPlurks();
+    void getPlurksFinished(QNetworkReply* reply);
+    void getPlurks();
     void displayAllPlurks();
     void displayMyPlurks();
     void displayPrivate();

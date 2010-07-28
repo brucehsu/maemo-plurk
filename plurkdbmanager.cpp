@@ -261,3 +261,15 @@ void PlurkDbManager::markAllAsUnread() {
     QSqlQuery query;
     query.exec("UPDATE plurks SET is_unread='0'");
 }
+
+QDateTime PlurkDbManager::getLatestPosted() {
+    QSqlQuery query;
+    query.exec("SELECT posted FROM plurks ORDER BY posted ASC");
+    if(query.next()) {
+        QDateTime latest;
+        latest.setTime_t(query.value(0).toInt());
+        return latest;
+    } else {
+        //Should not happen
+    }
+}

@@ -20,9 +20,10 @@ PlurkView::PlurkView(QWidget *parent) :
     btnGroup->addButton(ui->unreadBtn);
 
     dbManager = 0;
-    dbList = 0;
+    dbPlurkMap = 0;
+    dbUserMap = 0;
 
-    connect(ui->refreshBtn,SIGNAL(clicked()),this,SLOT(loadPlurks()));
+    connect(ui->refreshBtn,SIGNAL(clicked()),this,SLOT(getPlurks()));
     connect(ui->allPlurkBtn,SIGNAL(clicked()),this,SLOT(displayAllPlurks()));
     connect(ui->myPlurkBtn,SIGNAL(clicked()),SLOT(displayMyPlurks()));
     connect(ui->privateBtn,SIGNAL(clicked()),SLOT(displayPrivate()));
@@ -56,28 +57,27 @@ void PlurkView::setNetwork(QNetworkAccessManager *manager) {
     this->networkManager = manager;
 }
 
-void PlurkView::loadPlurks() {
+void PlurkView::getPlurks() {
     if(dbManager==0) {
         ui->plurkListWidget->setMinimumWidth(774);
         ui->plurkListWidget->setMaximumWidth(774);
     }
     if(QFile::exists("plurks.db")) {
-        QDateTime latest;
         if(dbManager==0) {
             dbManager = new PlurkDbManager();
             dbManager->markAllAsUnread();
-            if(dbList!=0) delete dbList;
-            dbList = dbManager->getAllPlurks();
-            QMap<QString,QString>* map;
-            foreach(map, (*dbList)) {
-                QMap<QString,QString> tmpMap = *map;
-                latest.setTime_t(tmpMap["posted"].toInt());
-                addPlurkLabel(tmpMap["plurk_id"],dbManager->getUserNameById(tmpMap["owner_id"]),
-                              tmpMap["qualifier_trasnlated"],tmpMap["content"],tmpMap["response_count"]);
-            }
+
+            if(dbPlurkMap!=0) delete dbPlurkMap;
+            dbPlurkMap = dbManager->getAllPlurks();
+
+            if(dbUserMap!=0) delete dbUserMap;
+            dbUserMap = dbManager->getAllUsers();
+
+            loadPlurkFromDb();
         }
 
         //For new plurks
+        QDateTime latest = dbManager->getLatestPosted();
         QString offset = latest.toString("yyyy-MM-ddThh:mm:ss");
         req = new QNetworkRequest(QUrl(APIURL+ POLL_GET_PLURKS +"api_key=" + APIKEY + "&offset=" + offset));
         req->setHeader(QNetworkRequest::CookieHeader,*cookie);
@@ -93,10 +93,10 @@ void PlurkView::loadPlurks() {
     }
     req->setHeader(QNetworkRequest::CookieHeader,*cookie);
     rep = networkManager->get(*req);
-    connect(networkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(loadFinished(QNetworkReply*)));
+    connect(networkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(getPlurksFinished(QNetworkReply*)));
 }
 
-void PlurkView::loadFinished(QNetworkReply* reply) {
+void PlurkView::getPlurksFinished(QNetworkReply* reply) {
     QByteArray a = reply->readAll();
     QJson::Parser parser;
     bool ok;
@@ -127,21 +127,35 @@ void PlurkView::loadFinished(QNetworkReply* reply) {
         dbManager->addPlurk(plurk_id,plurk_type,owner_id,content,
                             is_unread,favorite,qual_trans,res_seen,
                             res_cnt,QString::number(t.toTime_t()));
-        dbManager->addUser(owner_id,uMap["nick_name"].toString(),owner_name);
-        addPlurkLabel(plurk_id,owner_name,qual_trans,content,res_cnt);
+        dbManager->addUser(owner_id,uMap["nick_name"].toString(),owner_name,
+                           uMap["has_profile_image"].toString(),
+                           uMap["avatar"].toString());
+        /*addPlurkLabel(plurk_id,owner_id,owner_name,
+                      uMap["has_profile_image"].toString(),
+                      uMap["avatar"].toString(),
+                      qual_trans,content,res_cnt);*/
     }
 
 
-    if(dbList!=0) delete dbList;
-    dbList = dbManager->getAllPlurks();
+    if(dbPlurkMap!=0) delete dbPlurkMap;
+    dbPlurkMap = dbManager->getAllPlurks();
+    if(dbUserMap!=0) delete dbUserMap;
+    dbUserMap = dbManager->getAllUsers();
+
+    loadPlurkFromDb();
 }
 
-void PlurkView::addPlurkLabel(QString plurk_id, QString owner_name, QString qual_trans,
-                   QString content, QString res_cnt) {
+void PlurkView::addPlurkLabel(QString plurk_id, QString owner_id,
+                              QString owner_name, QString owner_image,
+                              QString owner_avatar, QString qual_trans,
+                              QString content, QString res_cnt) {
 
-    QString whole = owner_name + " " + qual_trans + ": " + content +
-                    "<br /><div align=\"right\"><font color=\"gray\">" + res_cnt +
-                    " Responses</font></div>";
+    QString whole = "<table><tr><td><img name=\"avatar\" src=\"" + AVATAR_URL
+                    + (owner_image=="1" ? owner_id : "default")
+                    + "-medium" + owner_avatar + ".gif\"></img></td><td>";
+    whole = whole + owner_name + " " + qual_trans + ": " + content +
+            "</td></tr></table><br /><div align=\"right\"><font color=\"gray\">" + res_cnt +
+            " Responses</font></div>";
 
     if(plurkMap.contains(plurk_id)) {
         //Edit existing label
@@ -169,7 +183,7 @@ void PlurkView::displayAllPlurks() {
 
 void PlurkView::displayMyPlurks() {
     QMap<QString,QString>* pmap;
-    foreach(pmap, *dbList) {
+    foreach(pmap, *dbPlurkMap) {
         QMap<QString,QString> map = (*pmap);
         if(map["owner_id"]==this->userId) {
             plurkMap[map["plurk_id"]]->setVisible(true);
@@ -181,7 +195,7 @@ void PlurkView::displayMyPlurks() {
 
 void PlurkView::displayPrivate() {
     QMap<QString,QString>* pmap;
-    foreach(pmap, *dbList) {
+    foreach(pmap, *dbPlurkMap) {
         QMap<QString,QString> map = (*pmap);
         if(map["plurk_type"]=="1" || map["plurk_type"]=="3") {
             plurkMap[map["plurk_id"]]->setVisible(true);
@@ -197,7 +211,7 @@ void PlurkView::displayResponded() {
 
 void PlurkView::displayLiked() {
     QMap<QString,QString>* pmap;
-    foreach(pmap, *dbList) {
+    foreach(pmap, *dbPlurkMap) {
         QMap<QString,QString> map = (*pmap);
         if(map["favorite"]=="true") {
             plurkMap[map["plurk_id"]]->setVisible(true);
@@ -209,12 +223,24 @@ void PlurkView::displayLiked() {
 
 void PlurkView::displayUnread() {
     QMap<QString,QString>* pmap;
-    foreach(pmap, *dbList) {
+    foreach(pmap, *dbPlurkMap) {
         QMap<QString,QString> map = (*pmap);
         if(map["is_unread"]=="1") {
             plurkMap[map["plurk_id"]]->setVisible(true);
         } else {
             plurkMap[map["plurk_id"]]->setVisible(false);
         }
+    }
+}
+
+void PlurkView::loadPlurkFromDb() {
+    QMap<QString,QString>* map;
+    foreach(map, (*dbPlurkMap)) {
+        QMap<QString,QString> tmpMap = *map;
+        QMap<QString,QString> uMap = *(dbUserMap->value(tmpMap["owner_id"]));
+        addPlurkLabel(tmpMap["plurk_id"],tmpMap["owner_id"],
+                      uMap["display_name"],uMap["profile"],uMap["avatar"],
+                      tmpMap["qualifer_translated"],tmpMap["content"],
+                      tmpMap["response_count"]);
     }
 }

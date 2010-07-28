@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QObject>
 #include <QVariant>
+#include <QDateTime>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
@@ -27,6 +28,7 @@ public:
     QMap<QString, ItemMap*>* getAllUsers();
     QString getUserNameById(QString userId);
     void markAllAsUnread();
+    QDateTime getLatestPosted();
 
 private:
     QSqlDatabase db;
