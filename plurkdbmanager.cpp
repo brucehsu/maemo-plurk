@@ -44,7 +44,9 @@ PlurkDbManager::PlurkDbManager()
                + "id INTEGER PRIMARY KEY ASC,"
                + "user_id UNIQUE,"
                + "nick_name,"
-               + "display_name)");
+               + "display_name,"
+               + "has_profile_image,"
+               + "avatar)");
 }
 
 PlurkDbManager::~PlurkDbManager() {
@@ -58,40 +60,59 @@ void PlurkDbManager::addPlurk(QString plurk_id, QString plurk_type,
                               QString qual_trans, QString res_seen,
                               QString res_cnt, QString posted) {
     QSqlQuery query;
+    QString dummy;
     query.exec("SELECT * FROM plurks WHERE plurk_id='" + plurk_id + "'");
     if(query.next()) {
         //Update record
-        query.exec("UPDATE plurks SET plurk_type='" + plurk_type + "',"
-                   + "content='" + content + "',"
-                   + "is_unread='" + is_unread + "',"
-                   + "favorite='" + favorite + "',"
-                   + "reponses_seen='" + res_seen + "',"
-                   + "response_cnt='" + res_cnt +"'"
-                   + "WHERE plurk_id='" + plurk_id + "'");
+        query.prepare(dummy + "UPDATE plurks SET plurk_type=:plurk_type,"
+                      + "content=:content,"
+                      + "is_unread=:is_unread,"
+                      + "favorite=:favorite,"
+                      + "reponses_seen=:res_seen,"
+                      + "response_cnt=:res_cnt"
+                      + " WHERE plurk_id=:plurk_id");
+        query.bindValue(":plurk_type",plurk_type);
+        query.bindValue(":content",content);
+        query.bindValue(":is_unread",is_unread);
+        query.bindValue(":favorite",favorite);
+        query.bindValue(":res_seen",res_seen);
+        query.bindValue(":res_cnt",res_cnt);
+        query.bindValue(":plurk_id",plurk_id);
+        query.exec();
     } else {
         //Add record
-        QString dummy;
-        query.exec(dummy + "INSERT INTO plurks("
-                   + "plurk_id,"
-                   + "plurk_type,"
-                   + "owner_id,"
-                   + "content,"
-                   + "is_unread,"
-                   + "favorite,"
-                   + "qualifier_translated,"
-                   + "responses_seen,"
-                   + "response_count,"
-                   + "posted) VALUES("
-                   + "'" + plurk_id + "',"
-                   + "'" + plurk_type + "',"
-                   + "'" + owner_id + "',"
-                   + "'" + content + "',"
-                   + "'" + is_unread + "',"
-                   + "'" + favorite + "',"
-                   + "'" + qual_trans + "',"
-                   + "'" + res_seen + "',"
-                   + "'" + res_cnt + "',"
-                   + "'" + posted + "')");
+        query.prepare(dummy + "INSERT INTO plurks("
+                      + "plurk_id,"
+                      + "plurk_type,"
+                      + "owner_id,"
+                      + "content,"
+                      + "is_unread,"
+                      + "favorite,"
+                      + "qualifier_translated,"
+                      + "responses_seen,"
+                      + "response_count,"
+                      + "posted) VALUES("
+                      + ":plurk_id,"
+                      + ":plurk_type,"
+                      + ":owner_id,"
+                      + ":content,"
+                      + ":is_unread,"
+                      + ":favorite,"
+                      + ":qual_trans,"
+                      + ":res_seen,"
+                      + ":res_cnt,"
+                      + ":posted)");
+        query.bindValue(":plurk_id",plurk_id);
+        query.bindValue(":plurk_type",plurk_type);
+        query.bindValue(":owner_id",owner_id);
+        query.bindValue(":content",content);
+        query.bindValue(":is_unread",is_unread);
+        query.bindValue(":favorite",favorite);
+        query.bindValue(":qual_trans",qual_trans);
+        query.bindValue(":res_seen",res_seen);
+        query.bindValue(":res_cnt",res_cnt);
+        query.bindValue(":posted",posted);
+        query.exec();
     }
 }
 
@@ -100,50 +121,75 @@ void PlurkDbManager::addResponse(QString plurk_id, QString res_id,
                                  QString posted) {
     QSqlQuery query;
     query.exec("SELECT * FROM response WHERE res_id='" + res_id + "'");
+    QString dummy;
     if(query.next()) {
-        //Not need to update
+        //No need to update
     } else {
         //Add record
-        QString dummy;
-        query.exec(dummy + "INSERT INTO response(" +
-                   + "plurk_id,"
-                   + "res_id,"
-                   + "user_id,"
-                   + "content,"
-                   + "posted) VALUES("
-                   + "'" + plurk_id + "',"
-                   + "'" + res_id + "',"
-                   + "'" + user_id + "',"
-                   + "'" + content + "',"
-                   + "'" + posted +"')");
+        query.prepare(dummy + "INSERT INTO response(" +
+                      + "plurk_id,"
+                      + "res_id,"
+                      + "user_id,"
+                      + "content,"
+                      + "posted) VALUES("
+                      + ":plurk_id,"
+                      + ":res_id,"
+                      + ":user_id,"
+                      + ":content,"
+                      + ":posted)");
+        query.bindValue(":plurk_id",plurk_id);
+        query.bindValue(":res_id",res_id);
+        query.bindValue(":user_id",user_id);
+        query.bindValue(":content",content);
+        query.bindValue(":posted",posted);
+        query.exec();
     }
 
 }
 
 void PlurkDbManager::addUser(QString user_id, QString nick_name,
-                             QString display_name) {
+                             QString display_name, QString profile,
+                             QString avatar) {
     QSqlQuery query;
     query.exec("SELECT * FROM users WHERE user_id='" + user_id + "'");
+    QString dummy;
     if(query.next()) {
         //Update record
-        query.exec("UPDATE users SET display_name='" + display_name + "'"
-                   + "WHERE user_id='" + user_id +"'");
+        query.prepare(dummy + "UPDATE users SET display_name=:display_name,"
+                      + "has_profile_image=:profie,"
+                      + "avatar=:avatar"
+                      + " WHERE user_id=:user_id");
+        query.bindValue(":display_name",display_name);
+        query.bindValue(":profile",profile);
+        query.bindValue(":avatar",avatar);
+        query.bindValue(":user_id",user_id);
+        query.exec();
     } else {
         //Add record
-        QString dummy;
-        query.exec(dummy + "INSERT INTO users(" +
-                   + "user_id,"
-                   + "nick_name,"
-                   + "display_name) VALUES("
-                   + "'" + user_id + "',"
-                   + "'" + nick_name + "',"
-                   + "'" + display_name +"')");
+        query.prepare(dummy + "INSERT INTO users(" +
+                      + "user_id,"
+                      + "nick_name,"
+                      + "display_name,"
+                      + "has_profile_image,"
+                      + "avatar"
+                      + ") VALUES("
+                      + ":user_id,"
+                      + ":nick_name,"
+                      + ":display_name,"
+                      + ":profile,"
+                      + ":avatar)");
+        query.bindValue(":user_id",user_id);
+        query.bindValue(":nick_name",nick_name);
+        query.bindValue(":display_name",display_name);
+        query.bindValue(":profile",profile);
+        query.bindValue(":avatar",avatar);
+        query.exec();
     }
 }
 
-QList<QMap<QString,QString>*>* PlurkDbManager::getAllPlurks() {
+QMap<QString, ItemMap*>* PlurkDbManager::getAllPlurks() {
     QSqlQuery query;
-    QList<QMap<QString,QString>*>* list = new QList<QMap<QString,QString>*>();
+    QMap<QString, ItemMap*>* list = new QMap<QString, ItemMap*>();
     query.exec("SELECT "
                "id,"
                "plurk_id,"
@@ -170,20 +216,22 @@ QList<QMap<QString,QString>*>* PlurkDbManager::getAllPlurks() {
         map["responses_seen"] = query.value(8).toString();
         map["response_count"] = query.value(9).toString();
         map["posted"] = query.value(10).toString();
-        list->append(new QMap<QString,QString>(map));
+        list->insert(map["plurk_id"],new QMap<QString,QString>(map));
     }
     return list;
 }
 
-QList<QMap<QString,QString>*>* PlurkDbManager::getAllUsers() {
+QMap<QString, ItemMap*>* PlurkDbManager::getAllUsers() {
     QSqlQuery query;
-    QList<QMap<QString,QString>*>* list = new QList<QMap<QString,QString>*>();
-    QString dummy;
+    QMap<QString, ItemMap*>* list = new QMap<QString, ItemMap*>();
     query.exec("SELECT "
                "id,"
                "user_id,"
                "nick_name,"
-               "display_name" " FROM users");
+               "display_name,"
+               "has_profile_image,"
+               "avatar"
+               " FROM users");
 
     QMap<QString,QString> map;
     while(query.next()) {
@@ -191,7 +239,9 @@ QList<QMap<QString,QString>*>* PlurkDbManager::getAllUsers() {
         map["user_id"] = query.value(1).toString();
         map["nick_name"] = query.value(2).toString();
         map["display_name"] = query.value(3).toString();
-        list->append(new QMap<QString,QString>(map));
+        map["profile"] = query.value(4).toString();
+        map["avatar"] = query.value(5).toString();
+        list->insert(map["user_id"],new QMap<QString,QString>(map));
     }
     return list;
 }
