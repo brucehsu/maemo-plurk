@@ -294,7 +294,15 @@ void PlurkView::displayPrivate() {
 }
 
 void PlurkView::displayResponded() {
-
+    QMap<QString,QString>* pmap;
+    foreach(pmap, *dbPlurkMap) {
+        QMap<QString,QString> map = (*pmap);
+        if(map["plurk_type"]=="2"||map["plurk_type"]=="3") {
+            plurkMap[map["plurk_id"]]->setVisible(true);
+        } else {
+            plurkMap[map["plurk_id"]]->setVisible(false);
+        }
+    }
 }
 
 void PlurkView::displayLiked() {
