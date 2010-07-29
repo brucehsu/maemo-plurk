@@ -33,9 +33,19 @@ void ClickLabel::refreshText(QString text) {
             //Ignore local urls
             continue;
         }
+
         if(ele.attribute("name")=="avatar") {
             continue;
         }
+
+        if(ele.attribute("class")=="emoticon") {
+            //Ignore when emoticon is already downloaded
+            if(QFile::exists("emoticons/" + filename)) {
+                ele.setAttribute("src","emoticons/" + filename);
+                continue;
+            }
+        }
+
         manager->get(QNetworkRequest(QUrl(src)));
         connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(imgLoaded(QNetworkReply*)));
     }
@@ -89,20 +99,25 @@ void ClickLabel::imgLoaded(QNetworkReply *reply) {
 
     QString imgUrl = reply->url().toString();
     QString imgType = imgUrl.right(imgUrl.length() - imgUrl.lastIndexOf('.') - 1);
+    QString filename = imgUrl.right(imgUrl.length()-imgUrl.lastIndexOf("/") - 1);
     QString localUri;
 
     //Replace url in <img> tag
     foreach(QWebElement ele, eles) {
         if(ele.attribute("src")==imgUrl) {
             if(ele.attribute("name")=="avatar") {
-                QString owner_id = reply->url().toString();
-                owner_id = owner_id.right(owner_id.length()-owner_id.lastIndexOf("/") - 1);
-                localUri = owner_id;
+                //Replaced by getAvatars() in PlurkView
+                localUri = filename;
+            } else if(ele.attribute("class")=="emoticon") {
+                localUri = "emoticons/" + filename;
+                if(QFile::exists(localUri)) {
+                    return;
+                }
             } else {
                 localUri = plid + "_" + QString::number(++imgCount) + imgType;
+                imgList << localUri;
             }
             //Write downloaded image to filesystem
-            imgList << localUri;
             QFile *local = new QFile(localUri);
             local->open(QIODevice::WriteOnly);
             local->write(reply->readAll());

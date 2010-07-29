@@ -23,6 +23,9 @@ PlurkView::PlurkView(QWidget *parent) :
     QDir dir;
     dir.mkdir("avatars");
 
+    //Create directory for storing emoticons
+    dir.mkdir("emoticons");
+
     dbManager = 0;
     dbPlurkMap = 0;
     dbUserMap = 0;
