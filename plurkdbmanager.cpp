@@ -267,6 +267,7 @@ QDateTime PlurkDbManager::getLatestPosted() {
     query.exec("SELECT posted FROM plurks ORDER BY posted ASC");
     if(query.next()) {
         QDateTime latest;
+        latest.setTimeSpec(Qt::UTC);
         latest.setTime_t(query.value(0).toInt());
         return latest;
     } else {

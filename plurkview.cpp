@@ -163,6 +163,7 @@ void PlurkView::getPlurksFinished(QNetworkReply* reply) {
         //Convert formatted time into seconds
         //QDateTime t = QDateTime::fromString(posted,"dd MMM yyyy HH:mm:ss");
         QDateTime t = locale.toDateTime(posted,"dd MMM yyyy HH:mm:ss");
+        t.setTimeSpec(Qt::UTC);
 
         dbManager->addPlurk(plurk_id,plurk_type,owner_id,content,
                             is_unread,favorite,qual_trans,res_seen,
@@ -215,7 +216,9 @@ void PlurkView::addPlurkLabel(QString plurk_id) {
     QString owner_avatar = uMap["avatar"];
 
     QDateTime posted;
+    posted.setTimeSpec(Qt::UTC);
     posted.setTime_t(pMap["posted"].toInt());
+    posted = posted.toLocalTime();
 
     QString whole = "<table><tr><td height=\"45\" width=\"45\"><img "
                     "height=\"45\" width=\"45\" "
