@@ -20,6 +20,7 @@ public:
     explicit ClickLabel(QWidget *parent = 0);
     ClickLabel(QString text,QString plid);
     ~ClickLabel();
+    void refreshText(QString text);
 
 protected:
     void mousePressEvent (QMouseEvent *ev);
@@ -33,6 +34,7 @@ private:
     QWebPage *page;
     QWebElementCollection eles;
     QStringList imgList;
+    void deleteImages();
 
 signals:
     void clicked();

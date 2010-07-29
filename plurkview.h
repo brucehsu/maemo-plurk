@@ -50,6 +50,7 @@ private:
     void loadPlurkFromDb();
     void getAvatars();
     void refreshQueryMaps();
+    void refreshPlurkLabels();
 
 public slots:
     void getPlurksFinished(QNetworkReply* reply);

@@ -29,21 +29,27 @@ void LoginDialog::loginPlurk() {
     ui->checkBox->setEnabled(false);
     ui->loginBtn->setEnabled(false);
 
-    req = new QNetworkRequest(QUrl(QString(APIURL_SSL + USERS_LOGIN + "api_key=" + APIKEY)
-                                   + "&username=" + ui->usernameEdit->text() +
-                                   "&password=" + ui->passwdEdit->text() + "&no_data=1"));
-    rep = manager->get(*req);
+    QString loginUrl = (APIURL_SSL + USERS_LOGIN + "api_key=" + APIKEY)
+                       + "&username=" + ui->usernameEdit->text() +
+                       "&password=" + ui->passwdEdit->text();
+    rep = manager->get(QNetworkRequest(QUrl(loginUrl)));
     connect(rep,SIGNAL(finished()),this,SLOT(loginFinished()));
 }
 
 void LoginDialog::loginFinished() {
     disconnect(rep,SIGNAL(finished()),this,SLOT(loginFinished()));
     cookie = new QVariant(rep->header(QNetworkRequest::SetCookieHeader));
-    if(QString(rep->readAll()).contains("success")) {
+    QByteArray a = rep->readAll();
+    if(!(QString(a).contains("error_text"))) {
+        QJson::Parser parser;
+        bool ok;
+        QVariantMap result = parser.parse(a,&ok).toMap();
+        QVariantMap user_info = result["user_info"].toMap();
         pv = new PlurkView();
+        pv->setUserId(user_info["id"].toString());
         pv->setCookie(cookie);
         pv->setNetwork(manager);
-        pv->loadPlurks();
+        pv->getPlurks();
         this->setVisible(false);
     } else {
         ui->usernameEdit->setEnabled(true);

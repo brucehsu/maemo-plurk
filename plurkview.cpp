@@ -19,9 +19,14 @@ PlurkView::PlurkView(QWidget *parent) :
     btnGroup->addButton(ui->likedBtn);
     btnGroup->addButton(ui->unreadBtn);
 
+    //Create directory for storing avatars
+    QDir dir;
+    dir.mkdir("avatars");
+
     dbManager = 0;
     dbPlurkMap = 0;
     dbUserMap = 0;
+    avatarNetworkManager = 0;
 
     connect(ui->refreshBtn,SIGNAL(clicked()),this,SLOT(getPlurks()));
     connect(ui->allPlurkBtn,SIGNAL(clicked()),this,SLOT(displayAllPlurks()));
@@ -46,6 +51,7 @@ PlurkView::~PlurkView()
     delete plurkLayout;
     delete btnGroup;
     delete dbManager;
+    delete avatarNetworkManager;
     delete ui;
 }
 
@@ -99,7 +105,26 @@ void PlurkView::getPlurks() {
 }
 
 void PlurkView::getAvatars() {
+    if(avatarNetworkManager==0) {
+        avatarNetworkManager = new QNetworkAccessManager();
+    }
 
+    QMap<QString,QString>* pmap;
+    foreach(pmap, (*dbUserMap)) {
+        QMap<QString,QString> map = *pmap;
+
+        QString avatarName = map["user_id"] + "-medium" + map["avatar"] + ".gif";
+        QString avatarPath = "avatars/" + avatarName;
+
+        if(!QFile::exists(avatarPath)) {
+            if(map["profile"]!="1") {
+                avatarNetworkManager->get(QNetworkRequest(QUrl(DEFAULT_AVATAR_MED)));
+            } else {
+               avatarNetworkManager->get(QNetworkRequest(QUrl(AVATAR_URL + avatarName)));
+            }
+            connect(avatarNetworkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(getAvatarsFinished(QNetworkReply*)));
+        }
+    }
 }
 
 void PlurkView::getPlurksFinished(QNetworkReply* reply) {
@@ -136,34 +161,54 @@ void PlurkView::getPlurksFinished(QNetworkReply* reply) {
         dbManager->addUser(owner_id,uMap["nick_name"].toString(),owner_name,
                            uMap["has_profile_image"].toString(),
                            uMap["avatar"].toString());
-        /*addPlurkLabel(plurk_id,owner_id,owner_name,
-                      uMap["has_profile_image"].toString(),
-                      uMap["avatar"].toString(),
-                      qual_trans,content,res_cnt);*/
     }
 
     loadPlurkFromDb();
+    getAvatars();
 }
 
 void PlurkView::getAvatarsFinished(QNetworkReply *reply) {
+    QString url = reply->url().toString();
+    QString filename = url.right(url.length()-url.lastIndexOf("/") - 1);
+    filename.replace("_","-");
 
+    if(QFile::exists("avatars/" + filename)) {
+        return;
+    }
+
+    QFile *local = new QFile("avatars/" + filename);
+    local->open(QIODevice::WriteOnly);
+    local->write(reply->readAll());
+    local->flush();
+    local->close();
+    delete local;
+
+    refreshPlurkLabels();
+}
+
+
+void PlurkView::refreshPlurkLabels() {
+    foreach(ClickLabel* label, plurkMap) {
+        label->refreshText(label->text());
+    }
 }
 
 void PlurkView::addPlurkLabel(QString plurk_id, QString owner_id,
                               QString owner_name, QString owner_image,
                               QString owner_avatar, QString qual_trans,
                               QString content, QString res_cnt) {
-
-    QString whole = "<table><tr><td><img name=\"avatar\" src=\"" + AVATAR_URL
+    QString whole = "<table><tr><td height=\"45\" width=\"45\"><img "
+                    "height=\"45\" width=\"45\" "
+                    "name=\"avatar\" src=\"avatars/"
                     + (owner_image=="1" ? owner_id : "default")
                     + "-medium" + owner_avatar + ".gif\"></img></td><td>";
     whole = whole + owner_name + " " + qual_trans + ": " + content +
-            "</td></tr></table><br /><div align=\"right\"><font color=\"gray\">" + res_cnt +
-            " Responses</font></div>";
+            "</td></tr></table><br /><div align=\"right\"><font color=\"gray\">"
+            + res_cnt + " Responses</font></div>";
 
     if(plurkMap.contains(plurk_id)) {
         //Edit existing label
-        plurkMap[plurk_id]->setText(whole);
+        plurkMap[plurk_id]->refreshText(whole);
         return;
     }
 
