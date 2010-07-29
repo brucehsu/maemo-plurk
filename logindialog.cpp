@@ -10,8 +10,8 @@ LoginDialog::LoginDialog(QWidget *parent) :
     ui->setupUi(this);
     ui->checkBox->setVisible(false);
     connect(ui->loginBtn,SIGNAL(clicked()),this,SLOT(loginPlurk()));
-    ui->usernameEdit->setCompleter(0);
-    ui->passwdEdit->setCompleter(0);
+    ui->usernameEdit->setInputMethodHints(Qt::ImhNoPredictiveText | Qt::ImhNoAutoUppercase);
+    ui->passwdEdit->setInputMethodHints(Qt::ImhNoPredictiveText | Qt::ImhNoAutoUppercase);
     manager = new QNetworkAccessManager();
     pv = 0;
 }

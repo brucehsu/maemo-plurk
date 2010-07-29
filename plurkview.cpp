@@ -203,7 +203,7 @@ void PlurkView::addPlurkLabel(QString plurk_id, QString owner_id,
                     + (owner_image=="1" ? owner_id : "default")
                     + "-medium" + owner_avatar + ".gif\"></img></td><td>";
     whole = whole + owner_name + " " + qual_trans + ": " + content +
-            "</td></tr></table><br /><div align=\"right\"><font color=\"gray\">"
+            "</td></tr></table><div align=\"right\"><font color=\"gray\">"
             + res_cnt + " Responses</font></div>";
 
     if(plurkMap.contains(plurk_id)) {
