@@ -17,14 +17,16 @@ SOURCES += main.cpp \
     logindialog.cpp \
     plurkview.cpp \
     clicklabel.cpp \
-    plurkdbmanager.cpp
+    plurkdbmanager.cpp \
+    responsesview.cpp
 
 HEADERS  += \
     logindialog.h \
     plurkview.h \
     clicklabel.h \
     plurkdbmanager.h \
-    const.h
+    const.h \
+    responsesview.h
 
 CONFIG += mobility
 MOBILITY = 
@@ -38,4 +40,7 @@ symbian {
 
 FORMS += \
     logindialog.ui \
-    plurkview.ui
+    plurkview.ui \
+    responsesview.ui
+
+RESOURCES += icons/icons.qrc

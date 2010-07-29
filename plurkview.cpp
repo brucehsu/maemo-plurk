@@ -209,8 +209,18 @@ void PlurkView::addPlurkLabel(QString plurk_id) {
                     + (owner_image=="1" ? owner_id : "default")
                     + "-medium" + owner_avatar + ".gif\"></img></td><td>";
     whole = whole + owner_name + " " + qual_trans + ": " + content +
-            "</td></tr></table><div align=\"right\"><font color=\"gray\">"
-            + res_cnt + " Responses</font></div>";
+            "</td></tr></table>";
+    whole = whole + "<div align=\"right\"><font color=\"gray\">"
+           + res_cnt + " Responses</font>";
+    if(pMap["favorite"]=="true") {
+        //Display favorite icon
+        whole = whole + "&nbsp<img src=\":/fav.png\"></img>";
+    }
+    if(pMap["plurk_type"]=="1"||pMap["plurk_type"]=="3") {
+        //Display private icon
+        whole = whole + "&nbsp<img src=\":/private.png\"></img>";
+    }
+    whole = whole + "</div>";
 
     if(plurkMap.contains(plurk_id)) {
         //Edit existing label
