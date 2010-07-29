@@ -74,6 +74,7 @@ void ClickLabel::mouseReleaseEvent( QMouseEvent * ev ) {
 }
 
 void ClickLabel::imgLoaded(QNetworkReply *reply) {
+    reply->deleteLater();
     if(reply->error()!=QNetworkReply::NoError) {
         //Stop loading when file doesn't exist
         if(reply->error()==QNetworkReply::ContentNotFoundError) {

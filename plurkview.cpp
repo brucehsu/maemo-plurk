@@ -113,7 +113,9 @@ void PlurkView::getAvatars() {
     foreach(pmap, (*dbUserMap)) {
         QMap<QString,QString> map = *pmap;
 
-        QString avatarName = map["user_id"] + "-medium" + map["avatar"] + ".gif";
+        QString avatarName = map["user_id"] + "-medium"
+                             + (map["avatar"]=="0" ? "" : map["avatar"])
+                             + ".gif";
         QString avatarPath = "avatars/" + avatarName;
 
         if(!QFile::exists(avatarPath)) {
@@ -128,6 +130,7 @@ void PlurkView::getAvatars() {
 }
 
 void PlurkView::getPlurksFinished(QNetworkReply* reply) {
+    reply->deleteLater();
     QByteArray a = reply->readAll();
     QJson::Parser parser;
     bool ok;
@@ -168,6 +171,7 @@ void PlurkView::getPlurksFinished(QNetworkReply* reply) {
 }
 
 void PlurkView::getAvatarsFinished(QNetworkReply *reply) {
+    reply->deleteLater();
     QString url = reply->url().toString();
     QString filename = url.right(url.length()-url.lastIndexOf("/") - 1);
     filename.replace("_","-");
@@ -207,7 +211,9 @@ void PlurkView::addPlurkLabel(QString plurk_id) {
                     "height=\"45\" width=\"45\" "
                     "name=\"avatar\" src=\"avatars/"
                     + (owner_image=="1" ? owner_id : "default")
-                    + "-medium" + owner_avatar + ".gif\"></img></td><td>";
+                    + "-medium"
+                    + (owner_avatar=="0" ? "" : owner_avatar)
+                    + ".gif\"></img></td><td>";
     whole = whole + owner_name + " " + qual_trans + ": " + content +
             "</td></tr></table>";
     whole = whole + "<div align=\"right\"><font color=\"gray\">"
