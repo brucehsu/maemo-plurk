@@ -142,6 +142,8 @@ void PlurkView::getPlurksFinished(QNetworkReply* reply) {
     QList<QVariant> plurks = result["plurks"].toList();
     QVariantMap users = result["plurk_users"].toMap();
 
+    QLocale locale(QLocale::English, QLocale::UnitedStates);
+
     for(int i=plurks.count()-1;i>=0;i--) {
         QVariantMap pMap = plurks[i].toMap();
         QVariantMap uMap = users[pMap["owner_id"].toString()].toMap();
@@ -159,7 +161,8 @@ void PlurkView::getPlurksFinished(QNetworkReply* reply) {
         posted.chop(4);
 
         //Convert formatted time into seconds
-        QDateTime t = QDateTime::fromString(posted,"dd MMM yyyy HH:mm:ss");
+        //QDateTime t = QDateTime::fromString(posted,"dd MMM yyyy HH:mm:ss");
+        QDateTime t = locale.toDateTime(posted,"dd MMM yyyy HH:mm:ss");
 
         dbManager->addPlurk(plurk_id,plurk_type,owner_id,content,
                             is_unread,favorite,qual_trans,res_seen,
@@ -210,6 +213,10 @@ void PlurkView::addPlurkLabel(QString plurk_id) {
     QString owner_name = uMap["display_name"];
     QString owner_image = uMap["profile"];
     QString owner_avatar = uMap["avatar"];
+
+    QDateTime posted;
+    posted.setTime_t(pMap["posted"].toInt());
+
     QString whole = "<table><tr><td height=\"45\" width=\"45\"><img "
                     "height=\"45\" width=\"45\" "
                     "name=\"avatar\" src=\"avatars/"
@@ -218,9 +225,13 @@ void PlurkView::addPlurkLabel(QString plurk_id) {
                     + (owner_avatar=="0" ? "" : owner_avatar)
                     + ".gif\"></img></td><td>";
     whole = whole + owner_name + " " + qual_trans + ": " + content +
-            "</td></tr></table>";
-    whole = whole + "<div align=\"right\"><font color=\"gray\">"
-           + res_cnt + " Responses</font>";
+            "</td></tr></table><font color=\"gray\">";
+    whole = whole + "<table width=\"760\"><tr>";
+    whole = whole + "<td align=\"left\">"
+            + posted.toString("yyyy-MM-dd hh:mm:ss")
+            + "</td>";
+    whole = whole + "<td align=\"right\">"
+           + res_cnt + " Responses";
     if(pMap["favorite"]=="true") {
         //Display favorite icon
         whole = whole + "&nbsp<img src=\":/fav.png\"></img>";
@@ -229,7 +240,7 @@ void PlurkView::addPlurkLabel(QString plurk_id) {
         //Display private icon
         whole = whole + "&nbsp<img src=\":/private.png\"></img>";
     }
-    whole = whole + "</div>";
+    whole = whole + "</td></tr></table></font>";
 
     if(plurkMap.contains(plurk_id)) {
         //Edit existing label
