@@ -43,10 +43,7 @@ private:
     QVBoxLayout *plurkLayout;
     QButtonGroup *btnGroup;
     PlurkDbManager *dbManager;
-    void addPlurkLabel(QString plurk_id,QString owner_id,
-                       QString owner_name,QString owner_image,
-                       QString owner_avatar, QString qual_trans,
-                       QString content, QString res_cnt);
+    void addPlurkLabel(QString plurk_id);
     void loadPlurkFromDb();
     void getAvatars();
     void refreshQueryMaps();

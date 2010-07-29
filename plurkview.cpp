@@ -193,10 +193,16 @@ void PlurkView::refreshPlurkLabels() {
     }
 }
 
-void PlurkView::addPlurkLabel(QString plurk_id, QString owner_id,
-                              QString owner_name, QString owner_image,
-                              QString owner_avatar, QString qual_trans,
-                              QString content, QString res_cnt) {
+void PlurkView::addPlurkLabel(QString plurk_id) {
+    ItemMap pMap = *(*dbPlurkMap)[plurk_id];
+    QString owner_id = pMap["owner_id"];
+    QString qual_trans = pMap["qualifier_translated"];
+    QString content = pMap["content"];
+    QString res_cnt = pMap["response_count"];
+    ItemMap uMap = *(*dbUserMap)[owner_id];
+    QString owner_name = uMap["display_name"];
+    QString owner_image = uMap["profile"];
+    QString owner_avatar = uMap["avatar"];
     QString whole = "<table><tr><td height=\"45\" width=\"45\"><img "
                     "height=\"45\" width=\"45\" "
                     "name=\"avatar\" src=\"avatars/"
@@ -289,9 +295,6 @@ void PlurkView::loadPlurkFromDb() {
     foreach(map, (*dbPlurkMap)) {
         QMap<QString,QString> tmpMap = *map;
         QMap<QString,QString> uMap = *(dbUserMap->value(tmpMap["owner_id"]));
-        addPlurkLabel(tmpMap["plurk_id"],tmpMap["owner_id"],
-                      uMap["display_name"],uMap["profile"],uMap["avatar"],
-                      tmpMap["qualifer_translated"],tmpMap["content"],
-                      tmpMap["response_count"]);
+        addPlurkLabel(tmpMap["plurk_id"]);
     }
 }
