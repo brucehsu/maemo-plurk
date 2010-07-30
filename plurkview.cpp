@@ -255,8 +255,20 @@ void PlurkView::addPlurkLabel(QString plurk_id) {
     ClickLabel* tmpLabel = new ClickLabel(whole,plurk_id);
     tmpLabel->setWordWrap(true);
     tmpLabel->setOpenExternalLinks(true);
+    tmpLabel->setObjectName(plurk_id);
     plurkMap[plurk_id] = tmpLabel;
-    plurkLayout->insertWidget(0,tmpLabel);
+
+    //Find proper position to insert
+    for(int cnt=plurkLayout->count(),i=0;i<cnt;i++) {
+        QLayoutItem *item = plurkLayout->itemAt(i);
+        ClickLabel *iLab = (ClickLabel*)(item->widget());
+        ItemMap iMap = *(*dbPlurkMap)[iLab->objectName()];
+        if(iMap["posted"].toInt()>pMap["posted"].toInt()) continue;
+        plurkLayout->insertWidget(i,tmpLabel);
+        return;
+    }
+
+    plurkLayout->insertWidget(plurkLayout->count(),tmpLabel);
 }
 
 void PlurkView::setUserId(QString id) {
