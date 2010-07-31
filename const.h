@@ -14,5 +14,6 @@ const QString RESPONSES_GET = "Responses/get?";
 const QString POLL_GET_PLURKS = "Polling/getPlurks?";
 const QString DEFAULT_AVATAR_BIG = "http://www.plurk.com/static/default_big.gif";
 const QString DEFAULT_AVATAR_MED = "http://www.plurk.com/static/default_medium.gif";
+const int REQ_PLURK_ADD = 0x10;
 
 #endif // CONST_H

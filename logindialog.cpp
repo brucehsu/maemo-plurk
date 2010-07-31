@@ -45,8 +45,11 @@ void LoginDialog::loginFinished() {
         bool ok;
         QVariantMap result = parser.parse(a,&ok).toMap();
         QVariantMap user_info = result["user_info"].toMap();
+        QString userName = user_info["display_name"].toString();
+        if(userName.isEmpty()) userName = user_info["nick_name"].toString();
         pv = new PlurkView();
         pv->setUserId(user_info["id"].toString());
+        pv->setUserName(userName);
         pv->setCookie(cookie);
         pv->setNetwork(manager);
         pv->getPlurks();

@@ -11,6 +11,8 @@ PlurkView::PlurkView(QWidget *parent) :
     plurkLayout = new QVBoxLayout(ui->plurkListScroll);
     plurkLayout->setMargin(1);
 
+    ui->addIndicator->setVisible(false);
+
     btnGroup = new QButtonGroup();
     btnGroup->addButton(ui->allPlurkBtn);
     btnGroup->addButton(ui->myPlurkBtn);
@@ -38,6 +40,7 @@ PlurkView::PlurkView(QWidget *parent) :
     connect(ui->respondedBtn,SIGNAL(clicked()),this,SLOT(displayResponded()));
     connect(ui->likedBtn,SIGNAL(clicked()),SLOT(displayLiked()));
     connect(ui->unreadBtn,SIGNAL(clicked()),this,SLOT(displayUnread()));
+    connect(ui->plurkBtn,SIGNAL(clicked()),this,SLOT(plurkAdd()));
 
     //ui->plurkListScroll->setWidget(ui->plurkListWidget);
     ui->plurkListWidget->setLayout(plurkLayout);
@@ -104,7 +107,7 @@ void PlurkView::getPlurks() {
     }
     req->setHeader(QNetworkRequest::CookieHeader,*cookie);
     rep = networkManager->get(*req);
-    connect(networkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(getPlurksFinished(QNetworkReply*)));
+    connect(networkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(plurkRequestFinished(QNetworkReply*)),Qt::UniqueConnection);
 }
 
 void PlurkView::getAvatars() {
@@ -132,17 +135,57 @@ void PlurkView::getAvatars() {
     }
 }
 
-void PlurkView::getPlurksFinished(QNetworkReply* reply) {
+void PlurkView::plurkRequestFinished(QNetworkReply* reply) {
     reply->deleteLater();
     QByteArray a = reply->readAll();
     QJson::Parser parser;
     bool ok;
     QVariantMap result = parser.parse(a,&ok).toMap();
     if(!ok) return;
-    QList<QVariant> plurks = result["plurks"].toList();
-    QVariantMap users = result["plurk_users"].toMap();
+
+    //Handle error returned by the server
+    if(result.contains("error_text")) {
+        QString error = result["error_text"].toString();
+        qDebug() << error << endl;
+        if(error=="anti-flood-same-content") {
+
+        } else if(error=="anti-flood-too-many-new") {
+
+        }
+        return;
+    }
 
     QLocale locale(QLocale::English, QLocale::UnitedStates);
+
+    if(reply->url().path().contains("plurkAdd")) {
+        //Only add the plurk user just posted
+        QString plurk_id = result["plurk_id"].toString();
+        QString plurk_type = result["plurk_type"].toString();
+        QString owner_id = result["owner_id"].toString();
+        QString content = result["content"].toString();
+        QString is_unread = result["is_unread"].toString();
+        QString favorite = result["favorite"].toString();
+        QString qual_trans = result["qualifier_translated"].toString();
+        QString res_seen = result["responses_seen"].toString();
+        QString res_cnt = result["response_count"].toString();
+        QString posted = result["posted"].toString().remove(0,5);
+        posted.chop(4);
+
+        //Convert formatted time into seconds
+        //QDateTime t = QDateTime::fromString(posted,"dd MMM yyyy HH:mm:ss");
+        QDateTime t = locale.toDateTime(posted,"dd MMM yyyy HH:mm:ss");
+        t.setTimeSpec(Qt::UTC);
+
+        dbManager->addPlurk(plurk_id,plurk_type,owner_id,content,
+                            is_unread,favorite,qual_trans,res_seen,
+                            res_cnt,QString::number(t.toTime_t()));
+        loadPlurkFromDb();
+        return;
+    }
+
+    //Process the data returned by calling getPlurks and getUnreadPlurks API
+    QList<QVariant> plurks = result["plurks"].toList();
+    QVariantMap users = result["plurk_users"].toMap();
 
     for(int i=plurks.count()-1;i>=0;i--) {
         QVariantMap pMap = plurks[i].toMap();
@@ -275,6 +318,10 @@ void PlurkView::setUserId(QString id) {
     this->userId = id;
 }
 
+void PlurkView::setUserName(QString name) {
+    this->userName = name;
+}
+
 void PlurkView::displayAllPlurks() {
     foreach(ClickLabel* label, plurkMap) {
         label->setVisible(true);
@@ -350,4 +397,14 @@ void PlurkView::loadPlurkFromDb() {
         QMap<QString,QString> uMap = *(dbUserMap->value(tmpMap["owner_id"]));
         addPlurkLabel(tmpMap["plurk_id"]);
     }
+}
+
+void PlurkView::plurkAdd() {
+    QString url = APIURL + TIMELINE_PLURK_ADD + "api_key=" + APIKEY;
+    url = url + "&content=" + ui->contentEdit->text();
+    url = url + "&qualifier=" + ui->qualifierCombo->currentText();
+    networkManager->get(QNetworkRequest(QUrl(url)));
+    connect(networkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(plurkRequestFinished(QNetworkReply*)),Qt::UniqueConnection);
+
+    ui->contentEdit->clear();
 }

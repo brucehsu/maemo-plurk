@@ -30,6 +30,7 @@ public:
     void setCookie(QVariant* cookie);
     void setNetwork(QNetworkAccessManager* manager);
     void setUserId(QString id);
+    void setUserName(QString name);
 
 private:
     Ui::PlurkView *ui;
@@ -38,6 +39,7 @@ private:
     QNetworkReply *rep;
     QVariant *cookie;
     QString userId;
+    QString userName;
     QMap<QString,ClickLabel*> plurkMap;
     QMap<QString, ItemMap*>* dbPlurkMap;
     QMap<QString, ItemMap*>* dbUserMap;
@@ -51,7 +53,7 @@ private:
     void refreshPlurkLabels();
 
 public slots:
-    void getPlurksFinished(QNetworkReply* reply);
+    void plurkRequestFinished(QNetworkReply* reply);
     void getAvatarsFinished(QNetworkReply* reply);
     void getPlurks();
     void displayAllPlurks();
@@ -60,6 +62,7 @@ public slots:
     void displayResponded();
     void displayLiked();
     void displayUnread();
+    void plurkAdd();
 };
 
 #endif // PLURKVIEW_H
