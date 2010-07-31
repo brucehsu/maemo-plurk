@@ -31,6 +31,7 @@ public:
     void setNetwork(QNetworkAccessManager* manager);
     void setUserId(QString id);
     void setUserName(QString name);
+    void setUserInfo(QVariantMap info);
 
 private:
     Ui::PlurkView *ui;
@@ -40,6 +41,7 @@ private:
     QVariant *cookie;
     QString userId;
     QString userName;
+    QVariantMap userInfo;
     QMap<QString,ClickLabel*> plurkMap;
     QMap<QString, ItemMap*>* dbPlurkMap;
     QMap<QString, ItemMap*>* dbUserMap;

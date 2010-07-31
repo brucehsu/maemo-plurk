@@ -104,6 +104,14 @@ void PlurkView::getPlurks() {
     }
     if(dbManager==0) {
         dbManager = new PlurkDbManager();
+
+        //Make sure current user is always in user database
+        dbManager->addUser(userInfo["id"].toString(),
+                           userInfo["nick_name"].toString(),
+                           userInfo["display_name"].toString().isEmpty() ?
+                           userInfo["nick_name"].toString() : userInfo["display_name"].toString(),
+                           userInfo["has_profile_image"].toString(),
+                           userInfo["avatar"].toString());
     }
     req->setHeader(QNetworkRequest::CookieHeader,*cookie);
     rep = networkManager->get(*req);
@@ -146,7 +154,6 @@ void PlurkView::plurkRequestFinished(QNetworkReply* reply) {
     //Handle error returned by the server
     if(result.contains("error_text")) {
         QString error = result["error_text"].toString();
-        qDebug() << error << endl;
         if(error=="anti-flood-same-content") {
 
         } else if(error=="anti-flood-too-many-new") {
@@ -322,6 +329,10 @@ void PlurkView::setUserName(QString name) {
     this->userName = name;
 }
 
+void PlurkView::setUserInfo(QVariantMap info) {
+    this->userInfo = info;
+}
+
 void PlurkView::displayAllPlurks() {
     foreach(ClickLabel* label, plurkMap) {
         label->setVisible(true);
@@ -332,7 +343,7 @@ void PlurkView::displayMyPlurks() {
     QMap<QString,QString>* pmap;
     foreach(pmap, *dbPlurkMap) {
         QMap<QString,QString> map = (*pmap);
-        if(map["owner_id"]==this->userId) {
+        if(map["owner_id"]==userInfo["id"].toString()) {
             plurkMap[map["plurk_id"]]->setVisible(true);
         } else {
             plurkMap[map["plurk_id"]]->setVisible(false);
