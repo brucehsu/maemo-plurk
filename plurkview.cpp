@@ -41,6 +41,7 @@ PlurkView::PlurkView(QWidget *parent) :
     connect(ui->likedBtn,SIGNAL(clicked()),SLOT(displayLiked()));
     connect(ui->unreadBtn,SIGNAL(clicked()),this,SLOT(displayUnread()));
     connect(ui->plurkBtn,SIGNAL(clicked()),this,SLOT(plurkAdd()));
+    connect(ui->contentEdit,SIGNAL(textChanged(QString)),this,SLOT(countCharacters(QString)));
 
     //ui->plurkListScroll->setWidget(ui->plurkListWidget);
     ui->plurkListWidget->setLayout(plurkLayout);
@@ -418,4 +419,21 @@ void PlurkView::plurkAdd() {
     connect(networkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(plurkRequestFinished(QNetworkReply*)),Qt::UniqueConnection);
 
     ui->contentEdit->clear();
+}
+
+void PlurkView::countCharacters(QString content) {
+    if(content.length()==0) {
+        this->ui->addIndicator->setVisible(false);
+        return;
+    }
+    QString display = "";
+    if(content.length()>140) {
+        display = display + "<font color=\"red\">";
+    }
+    display = display + QString::number(content.length()) + "/140";
+    if(content.length()>140) {
+        display = display + "</font>";
+    }
+    this->ui->addIndicator->setText(display);
+    this->ui->addIndicator->setVisible(true);
 }
