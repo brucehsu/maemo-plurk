@@ -36,7 +36,7 @@ public:
 private:
     Ui::PlurkView *ui;
     QNetworkAccessManager *networkManager, *avatarNetworkManager;
-    QNetworkRequest *req;
+    QNetworkRequest req;
     QNetworkReply *rep;
     QVariant *cookie;
     QString userId;

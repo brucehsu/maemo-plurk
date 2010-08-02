@@ -98,7 +98,7 @@ void ClickLabel::imgLoaded(QNetworkReply *reply) {
     }
 
     QString imgUrl = reply->url().toString();
-    QString imgType = imgUrl.right(imgUrl.length() - imgUrl.lastIndexOf('.') - 1);
+    QString imgType = imgUrl.right(imgUrl.length() - imgUrl.lastIndexOf('.'));
     QString filename = imgUrl.right(imgUrl.length()-imgUrl.lastIndexOf("/") - 1);
     QString localUri;
 

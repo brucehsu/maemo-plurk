@@ -12,6 +12,7 @@ const QString TIMELINE_GET_UNREAD = "Timeline/getUnreadPlurks?";
 const QString TIMELINE_PLURK_ADD = "Timeline/plurkAdd?";
 const QString RESPONSES_GET = "Responses/get?";
 const QString POLL_GET_PLURKS = "Polling/getPlurks?";
+const QString FRIENDS_GET_BY_OFFSET = "FriendsFans/getFriendsByOffset?";
 const QString DEFAULT_AVATAR_BIG = "http://www.plurk.com/static/default_big.gif";
 const QString DEFAULT_AVATAR_MED = "http://www.plurk.com/static/default_medium.gif";
 const int REQ_PLURK_ADD = 0x10;

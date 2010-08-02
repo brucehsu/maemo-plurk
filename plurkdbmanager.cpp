@@ -46,7 +46,8 @@ PlurkDbManager::PlurkDbManager()
                + "nick_name,"
                + "display_name,"
                + "has_profile_image,"
-               + "avatar)");
+               + "avatar,"
+               + "is_friend)");
 }
 
 PlurkDbManager::~PlurkDbManager() {
@@ -171,13 +172,14 @@ void PlurkDbManager::addUser(QString user_id, QString nick_name,
                       + "nick_name,"
                       + "display_name,"
                       + "has_profile_image,"
-                      + "avatar"
+                      + "avatar,"
+                      + "is_friend"
                       + ") VALUES("
                       + ":user_id,"
                       + ":nick_name,"
                       + ":display_name,"
                       + ":profile,"
-                      + ":avatar)");
+                      + ":avatar,'0')");
         query.bindValue(":user_id",user_id);
         query.bindValue(":nick_name",nick_name);
         query.bindValue(":display_name",display_name);
@@ -273,4 +275,21 @@ QDateTime PlurkDbManager::getLatestPosted() {
     } else {
         //Should not happen
     }
+}
+
+bool PlurkDbManager::setAsFriend(QString user_id) {
+    QSqlQuery query;
+    query.exec("SELECT id FROM users WHERE user_id='" + user_id + "'");
+    if(query.next()) {
+        return query.exec("UPDATE users SET is_friend='1' WHERE user_id='" + user_id + "'");
+    }
+
+    //No such user in database
+    return false;
+}
+
+int PlurkDbManager::getFriendsCount() {
+    QSqlQuery query;
+    query.exec("SELECT is_friend FROM users WHERE is_friend='1'");
+    return query.size();
 }

@@ -124,6 +124,21 @@ void PlurkView::getPlurks(QVariantMap *plurksMap) {
                                uMap["avatar"].toString());
         }
 
+        //Set friends
+        int friends_count = (*plurksMap)["friends_count"].toString().toInt();
+        int db_friends_count = dbManager->getFriendsCount();
+        if(friends_count > db_friends_count) {
+            //Update friends list
+            for(int i=0;i<=friends_count;i+=10) {
+                req = QNetworkRequest(QUrl(APIURL + FRIENDS_GET_BY_OFFSET +
+                                           "api_key=" + APIKEY +
+                                           "&user_id=" + userInfo["id"].toString() +
+                                           "&offset=" + QString::number(i)));
+                req.setHeader(QNetworkRequest::CookieHeader,*cookie);
+                networkManager->get(req);
+            }
+        }
+
         loadPlurkFromDb();
         getAvatars();
     } else {
@@ -138,18 +153,18 @@ void PlurkView::getPlurks(QVariantMap *plurksMap) {
             //For new plurks
             QDateTime latest = dbManager->getLatestPosted();
             QString offset = latest.toString("yyyy-MM-ddThh:mm:ss");
-            req = new QNetworkRequest(QUrl(APIURL+ POLL_GET_PLURKS +"api_key=" + APIKEY + "&offset=" + offset));
-            req->setHeader(QNetworkRequest::CookieHeader,*cookie);
-            rep = networkManager->get(*req);
+            req = QNetworkRequest(QUrl(APIURL+ POLL_GET_PLURKS +"api_key=" + APIKEY + "&offset=" + offset));
+            req.setHeader(QNetworkRequest::CookieHeader,*cookie);
+            rep = networkManager->get(req);
 
             //For unread plurks
-            req = new QNetworkRequest(QUrl(APIURL+ TIMELINE_GET_UNREAD +"api_key=" + APIKEY));
-            req->setHeader(QNetworkRequest::CookieHeader,*cookie);
-            rep = networkManager->get(*req);
+            req = QNetworkRequest(QUrl(APIURL+ TIMELINE_GET_UNREAD +"api_key=" + APIKEY));
+            req.setHeader(QNetworkRequest::CookieHeader,*cookie);
+            rep = networkManager->get(req);
         } else {
-            req = new QNetworkRequest(QUrl(APIURL+ TIMELINE_GET_PLURKS +"api_key=" + APIKEY +"&limit=30"));
-            req->setHeader(QNetworkRequest::CookieHeader,*cookie);
-            rep = networkManager->get(*req);
+            req = QNetworkRequest(QUrl(APIURL+ TIMELINE_GET_PLURKS +"api_key=" + APIKEY +"&limit=30"));
+            req.setHeader(QNetworkRequest::CookieHeader,*cookie);
+            rep = networkManager->get(req);
         }
 
 
@@ -158,6 +173,8 @@ void PlurkView::getPlurks(QVariantMap *plurksMap) {
         }
     }
 
+    connect(networkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(plurkRequestFinished(QNetworkReply*)),Qt::UniqueConnection);
+
     //Make sure current user is always in user database
     dbManager->addUser(userInfo["id"].toString(),
                        userInfo["nick_name"].toString(),
@@ -165,8 +182,7 @@ void PlurkView::getPlurks(QVariantMap *plurksMap) {
                        userInfo["nick_name"].toString() : userInfo["display_name"].toString(),
                        userInfo["has_profile_image"].toString(),
                        userInfo["avatar"].toString());
-
-    connect(networkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(plurkRequestFinished(QNetworkReply*)),Qt::UniqueConnection);
+    dbManager->setAsFriend(userInfo["id"].toString());
 }
 
 void PlurkView::getAvatars() {
@@ -199,12 +215,13 @@ void PlurkView::plurkRequestFinished(QNetworkReply* reply) {
     QByteArray a = reply->readAll();
     QJson::Parser parser;
     bool ok;
-    QVariantMap result = parser.parse(a,&ok).toMap();
+    QVariant result = parser.parse(a,&ok);
+    QVariantMap resultMap = result.toMap();
     if(!ok) return;
 
     //Handle error returned by the server
-    if(result.contains("error_text")) {
-        QString error = result["error_text"].toString();
+    if(resultMap.contains("error_text")) {
+        QString error = resultMap["error_text"].toString();
         if(error=="anti-flood-same-content") {
 
         } else if(error=="anti-flood-too-many-new") {
@@ -217,16 +234,16 @@ void PlurkView::plurkRequestFinished(QNetworkReply* reply) {
 
     if(reply->url().path().contains("plurkAdd")) {
         //Only add the plurk user just posted
-        QString plurk_id = result["plurk_id"].toString();
-        QString plurk_type = result["plurk_type"].toString();
-        QString owner_id = result["owner_id"].toString();
-        QString content = result["content"].toString();
-        QString is_unread = result["is_unread"].toString();
-        QString favorite = result["favorite"].toString();
-        QString qual_trans = result["qualifier_translated"].toString();
-        QString res_seen = result["responses_seen"].toString();
-        QString res_cnt = result["response_count"].toString();
-        QString posted = result["posted"].toString().remove(0,5);
+        QString plurk_id = resultMap["plurk_id"].toString();
+        QString plurk_type = resultMap["plurk_type"].toString();
+        QString owner_id = resultMap["owner_id"].toString();
+        QString content = resultMap["content"].toString();
+        QString is_unread = resultMap["is_unread"].toString();
+        QString favorite = resultMap["favorite"].toString();
+        QString qual_trans = resultMap["qualifier_translated"].toString();
+        QString res_seen = resultMap["responses_seen"].toString();
+        QString res_cnt = resultMap["response_count"].toString();
+        QString posted = resultMap["posted"].toString().remove(0,5);
         posted.chop(4);
 
         //Convert formatted time into seconds
@@ -239,11 +256,18 @@ void PlurkView::plurkRequestFinished(QNetworkReply* reply) {
                             res_cnt,QString::number(t.toTime_t()));
         loadPlurkFromDb();
         return;
+    } else if(reply->url().path().contains("getFriendsByOffset")) {
+        QList<QVariant> usersList = result.toList();
+        for(int i=0;i<usersList.count();i++) {
+            QVariantMap userMap = usersList[i].toMap();
+            dbManager->setAsFriend(userMap["id"].toString());
+        }
+        return;
     }
 
     //Process the data returned by calling getPlurks and getUnreadPlurks API
-    QList<QVariant> plurks = result["plurks"].toList();
-    QVariantMap users = result["plurk_users"].toMap();
+    QList<QVariant> plurks = resultMap["plurks"].toList();
+    QVariantMap users = resultMap["plurk_users"].toMap();
 
     for(int i=plurks.count()-1;i>=0;i--) {
         QVariantMap pMap = plurks[i].toMap();

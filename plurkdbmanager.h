@@ -24,6 +24,8 @@ public:
                      QString posted);
     void addUser(QString user_id, QString nick_name, QString display_name,
                  QString profile, QString avatar);
+    bool setAsFriend(QString user_id);
+    int getFriendsCount();
     QMap<QString, ItemMap*>* getAllPlurks();
     QMap<QString, ItemMap*>* getAllUsers();
     QString getUserNameById(QString userId);
