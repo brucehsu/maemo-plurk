@@ -58,7 +58,7 @@ public slots:
     void plurkRequestFinished(QNetworkReply* reply);
     void getAvatarsFinished(QNetworkReply* reply);
     void countCharacters(QString content);
-    void getPlurks();
+    void getPlurks(QVariantMap *plurksMap=0);
     void displayAllPlurks();
     void displayMyPlurks();
     void displayPrivate();

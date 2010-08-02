@@ -78,44 +78,94 @@ void PlurkView::refreshQueryMaps() {
     dbUserMap = dbManager->getAllUsers();
 }
 
-void PlurkView::getPlurks() {
+void PlurkView::getPlurks(QVariantMap *plurksMap) {
     if(dbManager==0) {
         ui->plurkListWidget->setMinimumWidth(774);
         ui->plurkListWidget->setMaximumWidth(774);
     }
-    if(QFile::exists("plurks.db")) {
+
+    if(plurksMap!=0) {
         if(dbManager==0) {
             dbManager = new PlurkDbManager();
             dbManager->markAllAsUnread();
-
-            loadPlurkFromDb();
         }
 
-        //For new plurks
-        QDateTime latest = dbManager->getLatestPosted();
-        QString offset = latest.toString("yyyy-MM-ddThh:mm:ss");
-        req = new QNetworkRequest(QUrl(APIURL+ POLL_GET_PLURKS +"api_key=" + APIKEY + "&offset=" + offset));
-        req->setHeader(QNetworkRequest::CookieHeader,*cookie);
-        rep = networkManager->get(*req);
+        QLocale locale(QLocale::English, QLocale::UnitedStates);
 
-        //For unread plurks
-        req = new QNetworkRequest(QUrl(APIURL+ TIMELINE_GET_UNREAD +"api_key=" + APIKEY));
+        QList<QVariant> plurksList = (*plurksMap)["plurks"].toList();
+        QVariantMap users = (*plurksMap)["plurks_users"].toMap();
+
+        for(int i=plurksList.count()-1;i>=0;i--) {
+            QVariantMap pMap = plurksList[i].toMap();
+            QVariantMap uMap = users[pMap["owner_id"].toString()].toMap();
+            QString plurk_id = pMap["plurk_id"].toString();
+            QString plurk_type = pMap["plurk_type"].toString();
+            QString owner_id = pMap["owner_id"].toString();
+            QString content = pMap["content"].toString();
+            QString is_unread = pMap["is_unread"].toString();
+            QString favorite = pMap["favorite"].toString();
+            QString qual_trans = pMap["qualifier_translated"].toString();
+            QString res_seen = pMap["responses_seen"].toString();
+            QString res_cnt = pMap["response_count"].toString();
+            QString posted = pMap["posted"].toString().remove(0,5);
+            QString owner_name = (uMap["display_name"].toString().isEmpty()) ? uMap["nick_name"].toString() : uMap["display_name"].toString();
+            posted.chop(4);
+
+            //Convert formatted time into seconds
+            //QDateTime t = QDateTime::fromString(posted,"dd MMM yyyy HH:mm:ss");
+            QDateTime t = locale.toDateTime(posted,"dd MMM yyyy HH:mm:ss");
+            t.setTimeSpec(Qt::UTC);
+
+            dbManager->addPlurk(plurk_id,plurk_type,owner_id,content,
+                                is_unread,favorite,qual_trans,res_seen,
+                                res_cnt,QString::number(t.toTime_t()));
+            dbManager->addUser(owner_id,uMap["nick_name"].toString(),owner_name,
+                               uMap["has_profile_image"].toString(),
+                               uMap["avatar"].toString());
+        }
+
+        loadPlurkFromDb();
+        getAvatars();
     } else {
-        req = new QNetworkRequest(QUrl(APIURL+ TIMELINE_GET_PLURKS +"api_key=" + APIKEY +"&limit=30"));
-    }
-    if(dbManager==0) {
-        dbManager = new PlurkDbManager();
+        if(QFile::exists("plurks.db")) {
+            if(dbManager==0) {
+                dbManager = new PlurkDbManager();
+                dbManager->markAllAsUnread();
 
-        //Make sure current user is always in user database
-        dbManager->addUser(userInfo["id"].toString(),
-                           userInfo["nick_name"].toString(),
-                           userInfo["display_name"].toString().isEmpty() ?
-                           userInfo["nick_name"].toString() : userInfo["display_name"].toString(),
-                           userInfo["has_profile_image"].toString(),
-                           userInfo["avatar"].toString());
+                loadPlurkFromDb();
+            }
+
+            //For new plurks
+            QDateTime latest = dbManager->getLatestPosted();
+            QString offset = latest.toString("yyyy-MM-ddThh:mm:ss");
+            req = new QNetworkRequest(QUrl(APIURL+ POLL_GET_PLURKS +"api_key=" + APIKEY + "&offset=" + offset));
+            req->setHeader(QNetworkRequest::CookieHeader,*cookie);
+            rep = networkManager->get(*req);
+
+            //For unread plurks
+            req = new QNetworkRequest(QUrl(APIURL+ TIMELINE_GET_UNREAD +"api_key=" + APIKEY));
+            req->setHeader(QNetworkRequest::CookieHeader,*cookie);
+            rep = networkManager->get(*req);
+        } else {
+            req = new QNetworkRequest(QUrl(APIURL+ TIMELINE_GET_PLURKS +"api_key=" + APIKEY +"&limit=30"));
+            req->setHeader(QNetworkRequest::CookieHeader,*cookie);
+            rep = networkManager->get(*req);
+        }
+
+
+        if(dbManager==0) {
+            dbManager = new PlurkDbManager();
+        }
     }
-    req->setHeader(QNetworkRequest::CookieHeader,*cookie);
-    rep = networkManager->get(*req);
+
+    //Make sure current user is always in user database
+    dbManager->addUser(userInfo["id"].toString(),
+                       userInfo["nick_name"].toString(),
+                       userInfo["display_name"].toString().isEmpty() ?
+                       userInfo["nick_name"].toString() : userInfo["display_name"].toString(),
+                       userInfo["has_profile_image"].toString(),
+                       userInfo["avatar"].toString());
+
     connect(networkManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(plurkRequestFinished(QNetworkReply*)),Qt::UniqueConnection);
 }
 

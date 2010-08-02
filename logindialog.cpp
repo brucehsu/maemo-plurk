@@ -49,7 +49,7 @@ void LoginDialog::loginFinished() {
         pv->setUserInfo(user_info);
         pv->setCookie(cookie);
         pv->setNetwork(manager);
-        pv->getPlurks();
+        pv->getPlurks(&result);
         this->setVisible(false);
     } else {
         ui->usernameEdit->setEnabled(true);
