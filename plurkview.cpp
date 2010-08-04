@@ -496,6 +496,7 @@ void PlurkView::plurkAdd() {
 void PlurkView::countCharacters(QString content) {
     if(content.length()==0) {
         this->ui->addIndicator->setVisible(false);
+        this->repaint();
         return;
     }
     QString display = "";
