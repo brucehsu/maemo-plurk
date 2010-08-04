@@ -189,9 +189,9 @@ void PlurkDbManager::addUser(QString user_id, QString nick_name,
     }
 }
 
-QMap<QString, ItemMap*>* PlurkDbManager::getAllPlurks() {
+QMap<QString, ItemMap*>* PlurkDbManager::getAllPlurks(QMap<QString, ItemMap*> *oldList) {
     QSqlQuery query;
-    QMap<QString, ItemMap*>* list = new QMap<QString, ItemMap*>();
+    QMap<QString, ItemMap*>* list = (oldList==0) ? new QMap<QString, ItemMap*>() : oldList;
     query.exec("SELECT "
                "id,"
                "plurk_id,"
@@ -223,9 +223,9 @@ QMap<QString, ItemMap*>* PlurkDbManager::getAllPlurks() {
     return list;
 }
 
-QMap<QString, ItemMap*>* PlurkDbManager::getAllUsers() {
+QMap<QString, ItemMap*>* PlurkDbManager::getAllUsers(QMap<QString, ItemMap*> *oldList) {
     QSqlQuery query;
-    QMap<QString, ItemMap*>* list = new QMap<QString, ItemMap*>();
+    QMap<QString, ItemMap*>* list = (oldList==0) ? new QMap<QString, ItemMap*>() : oldList;
     query.exec("SELECT "
                "id,"
                "user_id,"

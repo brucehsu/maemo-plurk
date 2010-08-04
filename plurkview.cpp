@@ -71,11 +71,9 @@ void PlurkView::setNetwork(QNetworkAccessManager *manager) {
 }
 
 void PlurkView::refreshQueryMaps() {
-    if(dbPlurkMap!=0) delete dbPlurkMap;
-    dbPlurkMap = dbManager->getAllPlurks();
+    dbPlurkMap = dbManager->getAllPlurks(dbPlurkMap);
 
-    if(dbUserMap!=0) delete dbUserMap;
-    dbUserMap = dbManager->getAllUsers();
+    dbUserMap = dbManager->getAllUsers(dbUserMap);
 }
 
 void PlurkView::getPlurks(QVariantMap *plurksMap) {
@@ -498,6 +496,7 @@ void PlurkView::plurkAdd() {
 void PlurkView::countCharacters(QString content) {
     if(content.length()==0) {
         this->ui->addIndicator->setVisible(false);
+        this->repaint();
         return;
     }
     QString display = "";
