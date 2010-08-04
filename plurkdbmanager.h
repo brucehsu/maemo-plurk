@@ -26,8 +26,8 @@ public:
                  QString profile, QString avatar);
     bool setAsFriend(QString user_id);
     int getFriendsCount();
-    QMap<QString, ItemMap*>* getAllPlurks();
-    QMap<QString, ItemMap*>* getAllUsers();
+    QMap<QString, ItemMap*>* getAllPlurks(QMap<QString, ItemMap*> *oldList=0);
+    QMap<QString, ItemMap*>* getAllUsers(QMap<QString, ItemMap*> *oldList=0);
     QString getUserNameById(QString userId);
     void markAllAsUnread();
     QDateTime getLatestPosted();
