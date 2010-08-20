@@ -2,7 +2,6 @@
 #include "logindialog.h"
 #include "plurkview.h"
 #include <QDebug>
-#include <QImageReader>
 
 int main(int argc, char *argv[])
 {
@@ -13,6 +12,5 @@ int main(int argc, char *argv[])
 #else
     w.show();
 #endif
-
     return a.exec();
 }

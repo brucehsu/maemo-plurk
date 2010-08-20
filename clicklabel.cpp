@@ -79,7 +79,7 @@ void ClickLabel::mousePressEvent(QMouseEvent *ev) {
 
 void ClickLabel::mouseReleaseEvent( QMouseEvent * ev ) {
     this->setStyleSheet(border);
-    emit clicked();
+    emit clicked(plid);
     QLabel::mouseReleaseEvent(ev);
 }
 

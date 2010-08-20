@@ -15,6 +15,7 @@
 #include <qjson/parser.h>
 #include "clicklabel.h"
 #include "plurkdbmanager.h"
+#include "responsesview.h"
 
 namespace Ui {
     class PlurkView;
@@ -48,6 +49,7 @@ private:
     QVBoxLayout *plurkLayout;
     QButtonGroup *btnGroup;
     PlurkDbManager *dbManager;
+    ResponsesView *resView;
     void addPlurkLabel(QString plurk_id);
     void loadPlurkFromDb();
     void getAvatars();
@@ -66,6 +68,7 @@ public slots:
     void displayLiked();
     void displayUnread();
     void plurkAdd();
+    void showResponses(QString plid);
 };
 
 #endif // PLURKVIEW_H

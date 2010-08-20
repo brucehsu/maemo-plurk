@@ -37,7 +37,7 @@ private:
     void deleteImages();
 
 signals:
-    void clicked();
+    void clicked(QString);
 public slots:
     void imgLoaded(QNetworkReply* reply);
 

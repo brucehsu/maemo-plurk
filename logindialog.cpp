@@ -18,7 +18,6 @@ LoginDialog::LoginDialog(QWidget *parent) :
 
 LoginDialog::~LoginDialog()
 {
-    if(pv!=0) delete pv;
     delete manager;
     delete ui;
 }
@@ -45,6 +44,7 @@ void LoginDialog::loginFinished() {
         bool ok;
         QVariantMap result = parser.parse(a,&ok).toMap();
         QVariantMap user_info = result["user_info"].toMap();
+        disconnect(manager);
         pv = new PlurkView();
         pv->setUserInfo(user_info);
         pv->setCookie(cookie);

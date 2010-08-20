@@ -32,6 +32,7 @@ PlurkView::PlurkView(QWidget *parent) :
     dbPlurkMap = 0;
     dbUserMap = 0;
     avatarNetworkManager = 0;
+    resView = new ResponsesView();
 
     connect(ui->refreshBtn,SIGNAL(clicked()),this,SLOT(getPlurks()));
     connect(ui->allPlurkBtn,SIGNAL(clicked()),this,SLOT(displayAllPlurks()));
@@ -46,6 +47,8 @@ PlurkView::PlurkView(QWidget *parent) :
     //ui->plurkListScroll->setWidget(ui->plurkListWidget);
     ui->plurkListWidget->setLayout(plurkLayout);
     ui->contentEdit->setCompleter(0);
+    this->setAttribute(Qt::WA_QuitOnClose);
+    this->setAttribute(Qt::WA_DeleteOnClose);
     this->show();
 }
 
@@ -59,6 +62,7 @@ PlurkView::~PlurkView()
     delete btnGroup;
     delete dbManager;
     delete avatarNetworkManager;
+    delete resView;
     delete ui;
 }
 
@@ -380,6 +384,7 @@ void PlurkView::addPlurkLabel(QString plurk_id) {
     tmpLabel->setOpenExternalLinks(true);
     tmpLabel->setObjectName(plurk_id);
     plurkMap[plurk_id] = tmpLabel;
+    connect(tmpLabel,SIGNAL(clicked(QString)),this,SLOT(showResponses(QString)));
 
     //Find proper position to insert
     for(int cnt=plurkLayout->count(),i=0;i<cnt;i++) {
@@ -509,4 +514,9 @@ void PlurkView::countCharacters(QString content) {
     }
     this->ui->addIndicator->setText(display);
     this->ui->addIndicator->setVisible(true);
+}
+
+void PlurkView::showResponses(QString plid) {
+    resView->setMaps(dbPlurkMap->value(plid),dbUserMap);
+    resView->showMaximized();
 }
